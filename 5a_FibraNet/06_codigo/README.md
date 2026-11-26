@@ -18,7 +18,8 @@ Programa Java por consola que calcula la red de fibra óptica de costo mínimo c
 │   └── io/                       LectorCsv, EscritorCsv, Tabla
 ├── pruebas/fibranet/pruebas/Pruebas.java      31 verificaciones sin librerías externas
 ├── benchmark/fibranet/benchmark/Benchmark.java  tiempos vs N y CSV de resultados
-└── datos/                        red_ejemplo.csv, red_no_conexa.csv, red_con_errores.csv
+└── datos/                        red_ejemplo.csv, red_no_conexa.csv, red_con_errores.csv,
+                                  capitales_peru.csv (caso real: Red Dorsal Nacional)
 ```
 
 ## Requisitos
@@ -43,3 +44,9 @@ El paso 3 debe terminar con `31 pasaron, 0 fallaron`. El paso 5 tarda menos de u
 | `UnionFind.find` / `union` | O(α(n)) amortizado | Ω(1) | O(n) |
 | `Kruskal.calcular` | O(E log E) = O(E log V) | Ω(E log E) por el ordenamiento | O(V + E) |
 | `Prim.calcular` (montículo binario) | O(E log V) | Ω(E) | O(V + E) |
+
+## Caso real: Red Dorsal Nacional de Fibra Óptica
+
+La opción **10** del menú lee `datos/capitales_peru.csv`: las 24 capitales de departamento y el Callao, con su latitud y longitud (WGS84, grados decimales, precisión aproximada de 0,01°). Cada capital se une con sus **k = 4** capitales más cercanas, lo que da 65 tramos candidatos. El costo de cada tramo es la **distancia haversine** en km (`modelo/Geo.java`), es decir, la distancia en línea recta sobre la superficie terrestre. Es una cota inferior del cable real, que sigue carreteras y relieve.
+
+Resultado con k = 4: plan de 24 tramos y **4 081,4 km**, frente a 16 975,1 km de los 65 candidatos (76 % menos). Kruskal y Prim dan los mismos km (pruebas `Red Dorsal Nacional`).

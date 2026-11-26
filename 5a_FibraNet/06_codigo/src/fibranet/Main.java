@@ -2,6 +2,7 @@ package fibranet;
 
 import fibranet.benchmark.Benchmark;
 import fibranet.io.EscritorCsv;
+import fibranet.io.LectorCoordenadas;
 import fibranet.io.LectorCsv;
 import fibranet.io.Tabla;
 import fibranet.modelo.Arista;
@@ -52,6 +53,7 @@ public class Main {
                 case 7: consultarConexion(); break;
                 case 8: exportarPlan(); break;
                 case 9: Benchmark.ejecutar(); break;
+                case 10: cargarRedDorsal(); break;
                 case 0: System.out.println("Hasta luego."); break;
                 default: System.out.println("Opción no válida.");
             }
@@ -70,12 +72,51 @@ public class Main {
         System.out.println("7. Consultar si dos sedes quedan conectadas");
         System.out.println("8. Exportar último plan a CSV");
         System.out.println("9. Ejecutar benchmark");
+        System.out.println("10. Cargar Red Dorsal Nacional (capitales con coordenadas)");
         System.out.println("0. Salir");
     }
 
     // ------------------------------------------------------------------
     // 1 y 2. Entrada de datos
     // ------------------------------------------------------------------
+
+    /**
+     * Caso real: Red Dorsal Nacional de Fibra Óptica. Lee las capitales de
+     * departamento con sus coordenadas y propone tramos a las k más cercanas;
+     * el costo de cada tramo es la distancia haversine en km.
+     */
+    private static void cargarRedDorsal() {
+        String ruta = leerTexto("CSV de capitales (Enter = datos/capitales_peru.csv): ");
+        if (ruta.isEmpty()) {
+            ruta = "datos/capitales_peru.csv";
+        }
+        String texto = leerTexto("Vecinas por sede, k (Enter = 4): ");
+        int vecinos = 4;
+        try {
+            if (!texto.isEmpty()) {
+                vecinos = Integer.parseInt(texto);
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("  Valor no válido; se usa k = 4.");
+        }
+        if (vecinos < 1) {
+            vecinos = 1;
+        }
+        List<String> errores = new ArrayList<>();
+        try {
+            red = LectorCoordenadas.leer(Paths.get(ruta), vecinos, errores);
+            ultimoPlan = null;
+        } catch (IOException e) {
+            System.out.println("No se pudo leer el archivo: " + e.getMessage());
+            return;
+        }
+        for (String error : errores) {
+            System.out.println("  Descartada -> " + error);
+        }
+        System.out.printf("Red Dorsal: %d capitales y %d tramos candidatos (k = %d). Costos en km.%n",
+                red.numeroSedes(), red.numeroTramos(), vecinos);
+        verRed();
+    }
 
     /** CU-01: carga la red desde un CSV y reporta las filas descartadas. */
     private static void cargarCsv() {

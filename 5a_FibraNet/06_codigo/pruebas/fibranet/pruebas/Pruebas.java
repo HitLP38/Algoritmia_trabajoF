@@ -1,14 +1,17 @@
 package fibranet.pruebas;
 
 import fibranet.benchmark.Benchmark;
+import fibranet.io.LectorCoordenadas;
 import fibranet.io.LectorCsv;
 import fibranet.modelo.Arista;
+import fibranet.modelo.Geo;
 import fibranet.modelo.Grafo;
 import fibranet.motor.Kruskal;
 import fibranet.motor.Prim;
 import fibranet.motor.ResultadoMST;
 import fibranet.motor.UnionFind;
 
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +43,8 @@ public final class Pruebas {
         csvDeEjemplo();
         kruskalYPrimCoincidenEnRedesAleatorias();
         planEsArbolSinCiclos();
+        haversineDistanciasConocidas();
+        redDorsalNacional();
 
         System.out.println();
         System.out.printf("Verificaciones: %d pasaron, %d fallaron.%n", pasaron, fallas.size());
@@ -208,5 +213,39 @@ public final class Pruebas {
             }
         }
         verificar(sinCiclos, "ningún tramo del plan cierra un ciclo");
+    }
+
+    // ------------------------------------------------------------------
+    // Caso real: Red Dorsal Nacional
+    // ------------------------------------------------------------------
+
+    private static void haversineDistanciasConocidas() {
+        titulo("Haversine: distancias conocidas");
+        verificar(Geo.haversineKm(-12.0464, -77.0428, -12.0464, -77.0428) == 0.0, "distancia de un punto a sí mismo = 0");
+        double limaCallao = Geo.haversineKm(-12.0464, -77.0428, -12.0566, -77.1181);
+        verificar(limaCallao > 7 && limaCallao < 10, "Lima - Callao entre 7 y 10 km (obtenido " + limaCallao + ")");
+        double limaArequipa = Geo.haversineKm(-12.0464, -77.0428, -16.3989, -71.5350);
+        verificar(limaArequipa > 740 && limaArequipa < 790, "Lima - Arequipa entre 740 y 790 km (obtenido " + limaArequipa + ")");
+        double ida = Geo.haversineKm(-3.7491, -73.2538, -18.0146, -70.2536);
+        double vuelta = Geo.haversineKm(-18.0146, -70.2536, -3.7491, -73.2538);
+        verificar(Math.abs(ida - vuelta) < 1e-9, "la distancia es simétrica");
+    }
+
+    private static void redDorsalNacional() {
+        titulo("Red Dorsal Nacional: 25 capitales con coordenadas");
+        try {
+            List<String> errores = new ArrayList<>();
+            Grafo g = LectorCoordenadas.leer(Paths.get("datos", "capitales_peru.csv"), 4, errores);
+            verificar(errores.isEmpty(), "el CSV de capitales no tiene filas inválidas");
+            verificar(g.numeroSedes() == 25, "25 capitales (24 departamentos + Callao)");
+            ResultadoMST k = Kruskal.calcular(g, false);
+            ResultadoMST p = Prim.calcular(g, g.indice("Lima"), false);
+            verificar(k.esConexo(), "con k = 4 la red queda conectada");
+            verificar(k.tramosElegidos.size() == 24, "25 capitales -> 24 tramos");
+            verificar(Math.abs(k.costoTotal - p.costoTotal) < 1e-6, "Kruskal y Prim dan los mismos km");
+            verificar(k.costoTotal < g.costoTotalDeTodosLosTramos() / 2, "el plan usa menos de la mitad de los km candidatos");
+        } catch (IOException e) {
+            verificar(false, "no se pudo leer datos/capitales_peru.csv (ejecute desde 06_codigo)");
+        }
     }
 }

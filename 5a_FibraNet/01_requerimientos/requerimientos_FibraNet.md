@@ -55,7 +55,7 @@ No incluye:
 
 | ID | Categoría | Requerimiento |
 |---|---|---|
-| RNF-01 | Plataforma | Java 17 o superior, solo la librería estándar. Se compila y ejecuta con `javac` y `java` desde PowerShell, sin Maven ni Gradle. |
+| RNF-01 | Plataforma | Java 11 o superior, solo la librería estándar. Se compila y ejecuta con `javac` y `java` desde PowerShell, sin Maven ni Gradle. |
 | RNF-02 | Interfaz | Solo consola: menú numerado, mensajes en español y tablas alineadas con `printf`. |
 | RNF-03 | Eficiencia | Kruskal en O(E log E), Prim con montículo binario en O(E log V) y Union-Find en O(α(n)) amortizado por operación. |
 | RNF-04 | Rendimiento | Una red de 10 000 sedes y 100 000 tramos se resuelve en menos de 2 segundos en una laptop de estudiante. |

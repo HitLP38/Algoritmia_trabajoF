@@ -1,0 +1,11 @@
+Lámina 21 · Referencias
+Expone: Loli Aldunate, Cesar Antoni
+
+Esta lámina ya es visual en el HTML (código, simulador, tabla o gráfico). La imagen es OPCIONAL:
+úsela como apoyo en el informe o en un póster; si la genera, guárdela como 5a_FibraNet\03_ppt\img\L21.png.
+
+PROMPT PARA CHATGPT (copiar desde aquí):
+
+Imagen de apoyo opcional: una pila de libros técnicos de algoritmos con lomos en granate, dorado y azul, junto a una taza y una laptop. Estilo: ilustración plana de arquitectura técnica, fondo blanco con cuadrícula gris muy tenue, colores granate #8A1D2C, dorado #A87A22, azul #1F5FA8 y gris pizarra #152131, líneas limpias, sin sombras exageradas, sin texto incrustado salvo el que se indique, formato horizontal 16:9, alta resolución.
+
+Si la imagen sale con texto deformado, pida: "Repite la imagen sin ningún texto".

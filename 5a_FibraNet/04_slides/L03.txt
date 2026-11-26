@@ -1,0 +1,11 @@
+Lámina 03 · El problema de FibraNet
+Expone: Acosta Simon, Christopher Ricardo
+
+Esta imagen SE USA en la lámina. Guárdela como:
+  5a_FibraNet\03_ppt\img\L03.png
+
+PROMPT PARA CHATGPT (copiar desde aquí):
+
+Mapa esquemático (no realista) de Lima con 12 sedes como pines: Sede Central, San Isidro, Miraflores, Barranco, Chorrillos, Surco, La Molina, Ate, San Juan de Lurigancho, Comas, Los Olivos y Callao. Entre ellas 18 líneas grises punteadas que representan tramos posibles de fibra; 11 de esas líneas resaltadas en granate grueso formando un árbol que une todas las sedes sin ciclos. Los nombres de las sedes pueden aparecer en letras pequeñas y legibles. Estilo: ilustración plana de arquitectura técnica, fondo blanco con cuadrícula gris muy tenue, colores granate #8A1D2C, dorado #A87A22, azul #1F5FA8 y gris pizarra #152131, líneas limpias, sin sombras exageradas, sin texto incrustado salvo el que se indique, formato horizontal 16:9, alta resolución.
+
+Si la imagen sale con texto deformado, pida: "Repite la imagen sin ningún texto".
