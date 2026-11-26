@@ -13,8 +13,10 @@ import redluz.modelo.Tipos;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Scanner;
 
 /**
@@ -87,11 +89,12 @@ public class Main {
         String rutaTramos = leerTexto("CSV de tramos (Enter = datos/tramos.csv): ");
         RedElectrica nueva = new RedElectrica();
         List<String> errores = new ArrayList<>();
+        Map<String, double[]> coordenadas = new HashMap<>();   // si el CSV de nodos trae latitud y longitud
         try {
             int nodos = LectorCsv.cargarNodos(Paths.get(rutaNodos.isEmpty() ? "datos/nodos.csv" : rutaNodos),
-                    nueva, errores);
+                    nueva, errores, coordenadas);
             int tramos = LectorCsv.cargarTramos(Paths.get(rutaTramos.isEmpty() ? "datos/tramos.csv" : rutaTramos),
-                    nueva, errores);
+                    nueva, errores, coordenadas);
             red = nueva;
             System.out.printf("Se cargaron %d nodos y %d tramos.%n", nodos, tramos);
         } catch (IOException e) {

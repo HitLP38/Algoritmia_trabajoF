@@ -1,5 +1,6 @@
 package redluz.io;
 
+import redluz.modelo.Geo;
 import redluz.modelo.RedDinamica;
 import redluz.modelo.RedDinamica.Resultado;
 
@@ -8,8 +9,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Lee los CSV de RedLuz (RF-01, RF-03):
@@ -47,6 +50,16 @@ public final class LectorCsv {
 
     /** Carga los nodos. Devuelve cuántos se agregaron. */
     public static int cargarNodos(Path ruta, RedDinamica red, List<String> errores) throws IOException {
+        return cargarNodos(ruta, red, errores, new HashMap<>());
+    }
+
+    /**
+     * Carga los nodos con coordenadas opcionales: id,tipo[,latitud,longitud].
+     * Las coordenadas válidas se guardan en el mapa (id -> {lat, lon}) para
+     * calcular después los km de los tramos que no los traen.
+     */
+    public static int cargarNodos(Path ruta, RedDinamica red, List<String> errores,
+                                  Map<String, double[]> coordenadas) throws IOException {
         int agregados = 0;
         for (String[] f : leerFilas(ruta)) {
             if (f.length < 3) {
@@ -56,6 +69,15 @@ public final class LectorCsv {
             Resultado r = red.agregarNodo(f[1], f[2].toUpperCase(Locale.ROOT));
             if (r == Resultado.OK) {
                 agregados++;
+                if (f.length >= 5 && !f[3].isEmpty()) {
+                    Double lat = numero(f[3]);
+                    Double lon = numero(f[4]);
+                    if (lat == null || lon == null || Math.abs(lat) > 90 || Math.abs(lon) > 180) {
+                        errores.add("Línea " + f[0] + " (" + f[1] + "): coordenadas inválidas, se ignoran");
+                    } else {
+                        coordenadas.put(f[1], new double[] {lat, lon});
+                    }
+                }
             } else {
                 errores.add("Línea " + f[0] + " (" + f[1] + "): " + Mensajes.de(r));
             }
@@ -65,15 +87,31 @@ public final class LectorCsv {
 
     /** Carga los tramos. Devuelve cuántos se conectaron. */
     public static int cargarTramos(Path ruta, RedDinamica red, List<String> errores) throws IOException {
+        return cargarTramos(ruta, red, errores, new HashMap<>());
+    }
+
+    /**
+     * Carga los tramos: origen,destino[,km]. Si km viene vacío y los dos
+     * nodos tienen coordenadas, km = distancia haversine (redondeada a metros).
+     */
+    public static int cargarTramos(Path ruta, RedDinamica red, List<String> errores,
+                                   Map<String, double[]> coordenadas) throws IOException {
         int conectados = 0;
         for (String[] f : leerFilas(ruta)) {
-            if (f.length < 4) {
+            if (f.length < 3) {
                 errores.add("Línea " + f[0] + ": se esperaba origen,destino,km");
                 continue;
             }
-            Double km = numero(f[3]);
+            String textoKm = (f.length >= 4) ? f[3] : "";
+            if (textoKm.isEmpty() && coordenadas.containsKey(f[1]) && coordenadas.containsKey(f[2])) {
+                double[] a = coordenadas.get(f[1]);
+                double[] b = coordenadas.get(f[2]);
+                double metros = Math.round(Geo.haversineKm(a[0], a[1], b[0], b[1]) * 1000);
+                textoKm = String.valueOf(Math.max(metros, 1) / 1000.0);   // al menos 1 m
+            }
+            Double km = numero(textoKm);
             if (km == null) {
-                errores.add("Línea " + f[0] + ": km '" + f[3] + "' no es un número");
+                errores.add("Línea " + f[0] + ": km '" + textoKm + "' no es un número (o faltan coordenadas)");
                 continue;
             }
             Resultado r = red.conectar(f[1], f[2], km);

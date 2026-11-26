@@ -11,9 +11,16 @@ import redluz.modelo.Tipos;
 import redluz.motor.LinkCutTree;
 import redluz.motor.Nodo;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 /**
@@ -42,6 +49,7 @@ public final class Pruebas {
         csvDeEjemplo();
         lctCoincideConBfsEnOperacionesAleatorias();
         arbolProfundoSinDesbordar();
+        coordenadasYCorteProgramado();
 
         System.out.println();
         System.out.printf("Verificaciones: %d pasaron, %d fallaron.%n", pasaron, fallas.size());
@@ -242,6 +250,9 @@ public final class Pruebas {
                     diferencias++;
                 }
             }
+            if (k % 1000 == 0 && !lct.clientesSinLuz().equals(bfs.clientesSinLuz())) {
+                diferencias++;                     // cada 1 000 operaciones: mismos clientes sin luz
+            }
         }
         verificar(diferencias == 0, "respuestas distintas: " + diferencias);
     }
@@ -260,5 +271,42 @@ public final class Pruebas {
         red.cortar("N50000", "N50001");
         verificar(!red.tieneLuz("N99999") && red.tieneLuz("N50000"), "el corte deja sin luz solo la parte de abajo");
         verificar(Benchmark.generarOperaciones(1000, 1000, new Random(1)).size() == 1000, "el benchmark genera M operaciones");
+    }
+
+    /**
+     * Caso real: nodos con latitud y longitud, tramos sin km (se calculan con
+     * haversine) y un corte programado que deja clientes sin luz.
+     */
+    private static void coordenadasYCorteProgramado() {
+        titulo("Coordenadas, km por haversine y clientes afectados por un corte");
+        try {
+            Path dir = Files.createTempDirectory("redluz");
+            Path nodos = dir.resolve("nodos.csv");
+            Path tramos = dir.resolve("tramos.csv");
+            Files.write(nodos, Arrays.asList("id,tipo,latitud,longitud",
+                    "SET,SUBESTACION,-12.1400,-77.0200",
+                    "P1,POSTE,-12.1490,-77.0200",          // 0,009° de latitud ≈ 1,0 km al sur
+                    "C1,CLIENTE,-12.1490,-77.0210",
+                    "C2,CLIENTE,-12.1500,-77.0200"), StandardCharsets.UTF_8);
+            Files.write(tramos, Arrays.asList("origen,destino,km",
+                    "SET,P1,",                              // sin km: se calcula
+                    "P1,C1,",
+                    "P1,C2,0.2"), StandardCharsets.UTF_8);  // con km: se respeta
+            RedElectrica red = new RedElectrica();
+            List<String> errores = new ArrayList<>();
+            Map<String, double[]> coordenadas = new HashMap<>();
+            LectorCsv.cargarNodos(nodos, red, errores, coordenadas);
+            int conectados = LectorCsv.cargarTramos(tramos, red, errores, coordenadas);
+            verificar(errores.isEmpty() && conectados == 3, "se cargan 3 tramos sin errores " + errores);
+            Ruta r = red.ruta("C2");
+            verificar(r != null && Math.abs(r.km - 1.201) < 0.005, "ruta de C2 ≈ 1,0 km (haversine) + 0,2 km");
+            verificar(red.clientesSinLuz().isEmpty(), "antes del corte nadie está sin luz");
+            red.cortar("SET", "P1");                         // corte programado del tramo troncal
+            verificar(red.clientesSinLuz().equals(Arrays.asList("C1", "C2")), "el corte deja sin luz a C1 y C2");
+            red.conectar("SET", "P1", 1.0);                  // fin del corte: se repone
+            verificar(red.clientesSinLuz().isEmpty(), "al reponer el tramo vuelve la luz");
+        } catch (IOException e) {
+            verificar(false, "no se pudo crear el CSV temporal: " + e.getMessage());
+        }
     }
 }

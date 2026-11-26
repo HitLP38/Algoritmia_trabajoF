@@ -50,3 +50,14 @@ El paso 3 debe terminar con `45 pasaron, 0 fallaron`. El paso 5 tarda alrededor 
 | `connected` / tiene luz | O(log n) amortizado | O(n) |
 | ruta (suma de km sobre el camino) | O(log n) amortizado | O(n) |
 | Memoria | O(n): un objeto `Nodo` por vértice y por tramo | O(n) |
+
+## Caso real: red de un distrito de Lima y cortes programados
+
+El programa ya acepta datos reales:
+
+- **Nodos con coordenadas:** `id,tipo,latitud,longitud` (las dos últimas columnas son opcionales).
+- **Tramos sin km:** `origen,destino,` → si los dos nodos tienen coordenadas, el km se calcula con la distancia haversine (`modelo/Geo.java`).
+- **Eventos con nota:** `evento,a,b,km,nota` → la nota (por ejemplo, "Corte programado 05/12 09:00-13:00") aparece en la tabla de resultados.
+- **Evento `AFECTADOS`:** cuenta y lista los clientes que están sin luz en ese momento (útil justo después de un corte programado).
+
+Los datos del distrito (subestación, calles y cortes programados publicados por la distribuidora) se preparan en `5b_RedLuz/07_datos_reales/` (prompt `P5B-00` de ChatGPT) y, una vez validados, se copian a `datos/caso_real/`.

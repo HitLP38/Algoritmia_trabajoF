@@ -38,6 +38,12 @@ public interface RedDinamica {
 
     int numeroNodos();
 
+    /**
+     * Clientes que hoy no tienen luz (por ejemplo, después de un corte
+     * programado). Sirve para saber a cuántos clientes afecta un corte.
+     */
+    List<String> clientesSinLuz();
+
     /** Tramos activos como filas {origen, destino, km} (sin el enlace virtual a FUENTE). */
     List<String[]> tramos();
 }

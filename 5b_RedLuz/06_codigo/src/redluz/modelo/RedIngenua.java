@@ -2,6 +2,7 @@ package redluz.modelo;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -129,6 +130,19 @@ public class RedIngenua implements RedDinamica {
             }
         }
         return null;
+    }
+
+    /** Un BFS por cliente: O(c · n). */
+    @Override
+    public List<String> clientesSinLuz() {
+        List<String> sinLuz = new ArrayList<>();
+        for (Map.Entry<String, String> e : tipos.entrySet()) {
+            if (Tipos.CLIENTE.equals(e.getValue()) && !tieneLuz(e.getKey())) {
+                sinLuz.add(e.getKey());
+            }
+        }
+        Collections.sort(sinLuz);
+        return sinLuz;
     }
 
     @Override

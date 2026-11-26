@@ -5,17 +5,19 @@ import redluz.modelo.Ruta;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Locale;
 
 /**
  * Ejecuta un archivo de eventos en orden (RF-09, CU-06):
  *
- *   evento,a,b,km
+ *   evento,a,b,km[,nota]       (nota opcional: fecha u origen del evento)
  *   LUZ,C1,,
  *   CORTAR,S1,P1,
  *   CONECTAR,S1,P1,0.8
  *   RUTA,C1,,
  *   ZONA,C1,C2,
+ *   AFECTADOS,,,               (cuántos clientes están sin luz ahora)
  *
  * y muestra una tabla con el resultado de cada uno.
  */
@@ -36,11 +38,15 @@ public final class ProcesadorEventos {
             String a = (f.length > 2) ? f[2] : "";
             String b = (f.length > 3) ? f[3] : "";
             String km = (f.length > 4) ? f[4] : "";
+            String nota = (f.length > 5) ? f[5] : "";     // opcional: fecha u origen del evento real
             String resultado = ejecutar(red, evento, a, b, km);
             if (resultado.startsWith("RECHAZADO") || resultado.startsWith("ERROR")) {
                 rechazados++;
             }
             String datos = b.isEmpty() ? a : a + " - " + b + (km.isEmpty() ? "" : " (" + km + " km)");
+            if (!nota.isEmpty()) {
+                datos = datos + " · " + nota;
+            }
             tabla.agregarFila(String.valueOf(total), evento, datos, resultado);
         }
 
@@ -74,6 +80,16 @@ public final class ProcesadorEventos {
                 Ruta r = red.ruta(a);
                 return (r == null) ? "SIN LUZ"
                         : String.format(Locale.US, "desde %s: %.2f km, %d tramos", r.subestacion, r.km, r.tramos);
+            }
+            case "AFECTADOS": {
+                // Clientes sin luz en este momento (p. ej. tras un corte programado).
+                List<String> sinLuz = red.clientesSinLuz();
+                if (sinLuz.isEmpty()) {
+                    return "0 clientes sin luz";
+                }
+                int mostrar = Math.min(5, sinLuz.size());
+                String lista = String.join(", ", sinLuz.subList(0, mostrar));
+                return sinLuz.size() + " clientes sin luz: " + lista + (sinLuz.size() > mostrar ? ", …" : "");
             }
             case "ZONA":
                 return red.mismaZona(a, b) ? "MISMA ZONA" : "ZONAS DISTINTAS";

@@ -4,6 +4,7 @@ import redluz.motor.LinkCutTree;
 import redluz.motor.Nodo;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -33,6 +34,7 @@ public class RedElectrica implements RedDinamica {
 
     private final Map<String, Nodo> nodos = new HashMap<>();             // id -> nodo del motor
     private final List<String> subestaciones = new ArrayList<>();         // marca -> id de subestación
+    private final List<String> clientes = new ArrayList<>();              // ids de tipo CLIENTE, en orden de alta
     private final Map<String, Nodo> nodosTramo = new HashMap<>();        // "A|B" -> nodo-tramo
     private final Map<String, String[]> datosTramo = new LinkedHashMap<>(); // "A|B" -> {A, B, km}
 
@@ -53,6 +55,9 @@ public class RedElectrica implements RedDinamica {
         int marca = esSubestacion ? subestaciones.size() : -1;
         Nodo nodo = new Nodo(id, 0, 0, marca);
         nodos.put(id, nodo);
+        if (tipo.equals(Tipos.CLIENTE)) {
+            clientes.add(id);
+        }
         if (esSubestacion) {
             subestaciones.add(id);
             Nodo enlace = new Nodo("FUENTE-" + id, 0, 0, -1);   // 0 km y no cuenta como tramo
@@ -143,6 +148,19 @@ public class RedElectrica implements RedDinamica {
         Nodo camino = lct.camino(fuente, nodos.get(id));
         String subestacion = subestaciones.get(lct.maxMarca(camino));
         return new Ruta(subestacion, lct.sumaKm(camino), lct.sumaTramos(camino));
+    }
+
+    /** Una consulta connected por cliente: O(c log n) amortizado. */
+    @Override
+    public List<String> clientesSinLuz() {
+        List<String> sinLuz = new ArrayList<>();
+        for (String id : clientes) {
+            if (!tieneLuz(id)) {
+                sinLuz.add(id);
+            }
+        }
+        Collections.sort(sinLuz);               // mismo orden que RedIngenua
+        return sinLuz;
     }
 
     @Override
