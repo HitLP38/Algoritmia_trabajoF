@@ -1,0 +1,13 @@
+# Compilados de Java
+out/
+*.class
+
+# Documentos del docente (no se publican)
+rubrica de evaluacion/
+
+# Archivos del sistema y editores
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+~$*
