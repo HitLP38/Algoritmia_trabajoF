@@ -1,0 +1,19 @@
+origen,destino,costo
+Sede Central,San Isidro,4
+Sede Central,Miraflores,7
+Sede Central,Callao,12
+San Isidro,Miraflores,3
+San Isidro,Surco,9
+Miraflores,Surco,5
+Miraflores,Barranco,2
+Barranco,Chorrillos,3
+Surco,Chorrillos,6
+Surco,La Molina,8
+Callao,Los Olivos,10
+Los Olivos,Comas,4
+Comas,San Juan de Lurigancho,11
+Sede Central,San Juan de Lurigancho,14
+San Juan de Lurigancho,Ate,6
+Ate,La Molina,5
+Ate,Sede Central,13
+Callao,San Isidro,15
