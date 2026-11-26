@@ -45,7 +45,7 @@ public class RedElectrica implements RedDinamica {
 
     @Override
     public Resultado agregarNodo(String id, String tipo) {
-        if (id == null || id.isEmpty() || !Tipos.esValido(tipo)) {
+        if (id == null || id.isEmpty() || id.contains("|") || !Tipos.esValido(tipo)) {   // "|" se usa en la clave del tramo
             return Resultado.DATO_INVALIDO;
         }
         if (nodos.containsKey(id)) {

@@ -124,10 +124,11 @@ public final class LectorCsv {
         return conectados;
     }
 
-    /** Convierte texto a número; null si no se puede. */
+    /** Convierte texto a número finito; null si no se puede (también "NaN" o "Infinity"). */
     public static Double numero(String texto) {
         try {
-            return Double.parseDouble(texto.trim());
+            double valor = Double.parseDouble(texto.trim());
+            return (Double.isNaN(valor) || Double.isInfinite(valor)) ? null : valor;
         } catch (NumberFormatException e) {
             return null;
         }
