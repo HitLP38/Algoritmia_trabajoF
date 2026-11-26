@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -323,7 +323,10 @@ public class Main {
         resumen.agregarFila("Tramos elegidos", plan.tramosElegidos.size() + " de " + red.numeroTramos());
         resumen.agregarFila("Costo total del plan", dinero(plan.costoTotal));
         resumen.agregarFila("Costo de tender todo", dinero(todos));
-        resumen.agregarFila("Ahorro", String.format(Locale.US, "%.1f %%", 100 * (todos - plan.costoTotal) / todos));
+        String ahorro = (todos > 0)                     // sin tramos no hay ahorro que calcular
+                ? String.format(Locale.US, "%.1f %%", 100 * (todos - plan.costoTotal) / todos)
+                : "-";
+        resumen.agregarFila("Ahorro", ahorro);
         resumen.agregarFila("Tiempo", String.format(Locale.US, "%.3f ms", plan.nanosegundos / 1e6));
         resumen.agregarFila("Red conexa", plan.esConexo() ? "Sí" : "No (" + plan.grupos + " grupos)");
         resumen.imprimir();
@@ -335,7 +338,7 @@ public class Main {
     /** RF-10: lista qué sedes quedaron juntas cuando la red no es conexa. */
     private static void imprimirGrupos(ResultadoMST plan) {
         UnionFind grupos = Kruskal.gruposDelPlan(red, plan);
-        Map<Integer, List<String>> porRaiz = new HashMap<>();
+        Map<Integer, List<String>> porRaiz = new LinkedHashMap<>();   // conserva el orden de las sedes
         for (int s = 0; s < red.numeroSedes(); s++) {
             porRaiz.computeIfAbsent(grupos.find(s), r -> new ArrayList<>()).add(red.nombre(s));
         }

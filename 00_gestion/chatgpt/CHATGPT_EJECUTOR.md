@@ -49,7 +49,7 @@ rubrica de evaluacion/            rúbrica y Laboratorio2_Slides_v2.html (estilo
 | 5.a | ✅ caso real listo (opción 10 del menú, 41 pruebas OK) | 25 capitales, 65 tramos candidatos (k = 4), plan 24 tramos = **4 081,4 km** vs 16 975,1 km (76,0 % menos) |
 | 5.b | 🔄 código listo para datos reales (coordenadas, km por haversine, evento AFECTADOS; 50 pruebas OK). Faltan los datos: P5B-00 | LCT 100 000 ops en 0,34 s; 209× más rápido que BFS con N = 5 000 (preliminar) |
 
-**Entorno de la PC del grupo (para la tabla "Entorno de ejecución" de los informes):** Intel Core i3-1005G1 @ 1,20 GHz · 16 GB de RAM · OpenJDK 21.0.12.1 (Eclipse Temurin) · Windows (versión: preguntar a Raul). Los tiempos de los informes siguen siendo preliminares hasta que Raul corra los benchmarks en esa PC (P5A-02 y P5B-05).
+**Entorno de la PC del grupo (para la tabla "Entorno de ejecución" de los informes):** Intel Core i3-1005G1 @ 1,20 GHz · 16 GB de RAM · OpenJDK 21.0.12.1 (Eclipse Temurin) · Windows 10 · 4 núcleos · JVM con 4 042 MB. **5.a ya tiene tiempos reales** (26/11): `5a_FibraNet/06_codigo/benchmark/resultados_mst.csv` y `resultados_unionfind.csv` → ejecuta P5A-02. 5.b sigue con datos preliminares hasta P5B-05.
 
 ## 6. Tabla de prompts
 
@@ -67,12 +67,13 @@ Fases: **1** = 5.a con el caso real · **2** = 5.b (requiere el código del caso
 | 2 | **P5B-02** | `eb7e6685` | `prompts/P5B-02_deck.md` | P5B-01 | Deck HTML 5.b + prompts + guiones | ⏳ |
 | 2 | **P5B-03** | `937e3ce4` | `prompts/P5B-03_imagenes.md` | P5B-02 | Imágenes de 5.b | ⏳ |
 | 2 | **P5B-04** | `c9262df5` | `prompts/P5B-04_guiones.md` | P5B-02 | Guiones y preguntas 5.b | ⏳ |
-| 3 | **P5A-02** | `a0a5feed` | `prompts/P5A-02_benchmark_pc.md` | CSV del benchmark en PC | Informe 5.a v3 con tiempos reales | ⏳ |
+| 3 | **P5A-02** | `a0a5feed` | `prompts/P5A-02_benchmark_pc.md` | CSV del benchmark en PC | Informe 5.a v3 con tiempos reales | ▶ listo para ejecutar |
 | 3 | **P5B-05** | `67f83fcc` | `prompts/P5B-05_benchmark_pc.md` | CSV del benchmark en PC | Informe 5.b v3 con tiempos reales | ⏳ |
 | 4 | **PGEN-01** | `515f3802` | `prompts/PGEN-01_revision_rubrica.md` | todo lo anterior | Revisión contra la rúbrica | ⏳ |
 <!-- /TABLA -->
 
 ## 7. Bitácora (más reciente arriba)
 
+- 26/11/2026 · Raul corrió el benchmark de 5.a en su PC (Windows 10): P5A-02 listo para ejecutar.
 - 26/11/2026 · Claude agregó P5B-00 (datos reales de 5.b).
 - 26/11/2026 · Claude creó este documento y los 11 prompts.

@@ -11,7 +11,7 @@ public class Arista implements Comparable<Arista> {
 
     public final int origen;    // índice de la sede de un extremo
     public final int destino;   // índice de la sede del otro extremo
-    public final double costo;  // costo de tender el tramo (miles de soles)
+    public final double costo;  // costo del tramo (miles de soles, o km en la Red Dorsal)
 
     public Arista(int origen, int destino, double costo) {
         this.origen = origen;
