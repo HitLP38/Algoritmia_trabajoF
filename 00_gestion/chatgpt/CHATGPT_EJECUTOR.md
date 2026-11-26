@@ -58,7 +58,7 @@ Fases: **1** = 5.a con el caso real · **2** = 5.b (requiere el código del caso
 <!-- TABLA -->
 | Fase | ID | Hash | Archivo | Requisito | Entrega | Estado |
 |---|---|---|---|---|---|---|
-| 1 | **P5A-01** | `87271114` | `prompts/P5A-01_informe_red_dorsal.md` | — | Informe 5.a v2 (caso Red Dorsal) | ⏳ |
+| 1 | **P5A-01** | `87271114` | `prompts/P5A-01_informe_red_dorsal.md` | — | Informe 5.a v2 (caso Red Dorsal) | ✅ |
 | 1 | **P5A-03** | `c912d2b1` | `prompts/P5A-03_deck_red_dorsal.md` | — | Deck HTML 5.a (caso Red Dorsal) | ⏳ |
 | 1 | **P5A-04** | `9ed48fe2` | `prompts/P5A-04_imagenes.md` | P5A-03 | Imágenes de 5.a | ⏳ |
 | 1 | **P5A-05** | `b944f411` | `prompts/P5A-05_guiones.md` | P5A-03 | Guiones y preguntas 5.a | ⏳ |
@@ -67,13 +67,15 @@ Fases: **1** = 5.a con el caso real · **2** = 5.b (requiere el código del caso
 | 2 | **P5B-02** | `eb7e6685` | `prompts/P5B-02_deck.md` | P5B-01 | Deck HTML 5.b + prompts + guiones | ⏳ |
 | 2 | **P5B-03** | `937e3ce4` | `prompts/P5B-03_imagenes.md` | P5B-02 | Imágenes de 5.b | ⏳ |
 | 2 | **P5B-04** | `c9262df5` | `prompts/P5B-04_guiones.md` | P5B-02 | Guiones y preguntas 5.b | ⏳ |
-| 3 | **P5A-02** | `a0a5feed` | `prompts/P5A-02_benchmark_pc.md` | CSV del benchmark en PC | Informe 5.a v3 con tiempos reales | ▶ listo para ejecutar |
+| 3 | **P5A-02** | `84b0cba1` | `prompts/P5A-02_benchmark_pc.md` | CSV del benchmark en PC | Informe 5.a v3 con tiempos reales | ✅ |
 | 3 | **P5B-05** | `67f83fcc` | `prompts/P5B-05_benchmark_pc.md` | CSV del benchmark en PC | Informe 5.b v3 con tiempos reales | ⏳ |
 | 4 | **PGEN-01** | `515f3802` | `prompts/PGEN-01_revision_rubrica.md` | todo lo anterior | Revisión contra la rúbrica | ⏳ |
 <!-- /TABLA -->
 
 ## 7. Bitácora (más reciente arriba)
 
+- 26/11/2026 · P5A-02 completado. Informe_FibraNet_v3.docx y FibraNet_Slides_v2.html incorporan el benchmark de la PC del grupo.
+- 26/11/2026 · P5A-01 completado. Informe_FibraNet_v2.docx incorpora el caso Red Dorsal Nacional.
 - 26/11/2026 · Raul corrió el benchmark de 5.a en su PC (Windows 10): P5A-02 listo para ejecutar.
 - 26/11/2026 · Claude agregó P5B-00 (datos reales de 5.b).
 - 26/11/2026 · Claude creó este documento y los 11 prompts.
