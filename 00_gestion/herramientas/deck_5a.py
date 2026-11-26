@@ -83,6 +83,11 @@ _UF_20K = next(f for f in BENCH["uf"] if f[0] == 20000)
 UF_VECES = int(round(_UF_20K[3] / _UF_20K[2], -2))
 UF_VECES_TXT = f"{UF_VECES:,}".replace(",", " ")
 
+def mapa(k, alt, modo):
+    return (f'<div class="mapa-caso"><svg data-red="{modo}" role="img" aria-label="{alt}"></svg>'
+            f'{img(k, alt)}</div>')
+
+
 def img(k, alt):
     return f'<div class="imgbox"><img data-img="{k}" alt="{alt}"></div>'
 
@@ -127,21 +132,19 @@ lam(1, "Portada", "FibraNet: red de fibra de costo mínimo", "0:40", f'''
     <div style="display:flex;flex-direction:column;gap:18px;justify-content:center">
       <div class="eyebrow"><b>PROYECTO FINAL · TEMA 5.a</b> Grupo 5</div>
       <h1>FibraNet</h1>
-      <p class="lead" style="font-size:28px">Conectar todas las sedes con fibra óptica al <b style="color:var(--granate)">menor costo</b> usando Prim, Kruskal y Union-Find.</p>
+      <p class="lead" style="font-size:28px">Un plan de fibra de <b style="color:var(--granate)">longitud mínima</b> inspirado en la Red Dorsal Nacional de Fibra Óptica.</p>
     </div>
-    {img("L01", "Mapa de Lima con sedes unidas por fibra")}
+    {mapa("L01", "Plan de fibra entre capitales del Perú", "plan")}
   </div>
   <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:40px;align-items:end">
     <div class="team teamlist"></div>
     <div style="font-size:18px;color:var(--muted)">Docente: <b style="color:var(--ink)">{DOCENTE}</b><br>Lima, martes 8 de diciembre de 2026</div>
   </div>''',
     "Buenos días. Somos el Grupo 5 y presentamos FibraNet, el tema 5.a del proyecto final. "
-    "El problema es muy concreto: una empresa quiere unir todas sus sedes de Lima con fibra óptica gastando lo menos posible. "
+    "Modelamos la conexión de 24 capitales departamentales y el Callao, tomando como contexto la Red Dorsal Nacional. "
     "Para resolverlo usamos tres herramientas del curso: el algoritmo de Kruskal, el algoritmo de Prim y la estructura Union-Find. "
     "Cada integrante va a explicar una parte, y los tres bloques del motor los explicamos Javier, Gianpierre y Raul.",
-    "Vista aérea estilizada de Lima Metropolitana de noche, con 12 puntos luminosos que representan sedes de una empresa "
-    "unidos por líneas de fibra óptica brillantes en color granate y dorado; algunas líneas forman un árbol (sin ciclos) "
-    "y otras posibles conexiones aparecen tenues y punteadas. Sensación de red eficiente y ordenada. " + ESTILO_IMG,
+    "Mapa del Perú con las 25 sedes y los 24 enlaces del plan. Usa el grafo de FibraNet como referencia. " + ESTILO_IMG,
     cls="cover", nocaj=True)
 
 # 2 ─ Agenda
@@ -158,25 +161,19 @@ lam(1, "Portada", "Agenda", "0:30", '''
 # 3 ─ Problema
 lam(1, "El problema", "El problema de FibraNet", "1:00", f'''
   <div class="eyebrow"><b>01</b> El problema</div>
-  <h2>¿Cómo unir 12 sedes gastando lo mínimo?</h2>
+  <h2>Red Dorsal Nacional de Fibra Óptica</h2>
   <div class="cols c46">
     <div style="display:flex;flex-direction:column;gap:20px;justify-content:center">
-      <div class="panel acc"><span class="tag">Pedido del cliente</span><p style="font-size:24px">Que <b>todas</b> las sedes queden comunicadas, sin tramos de sobra, al <b>menor costo</b> total.</p></div>
-      <div class="stat"><div><b>12</b><span>sedes</span></div><div><b>18</b><span>tramos posibles</span></div><div><b>137</b><span>costo de todos</span></div></div>
-      <div class="stat"><div style="border-color:var(--ok)"><b style="color:var(--ok)">61</b><span>costo del plan</span></div><div style="border-color:var(--ok)"><b style="color:var(--ok)">55,5 %</b><span>de ahorro</span></div><div><b>11</b><span>tramos = n − 1</span></div></div>
+      <div class="panel acc"><span class="tag">Modelo</span><p style="font-size:24px">Cuatro vecinas por sede. Cada tramo se pesa por su distancia haversine.</p></div>
+      <div class="stat"><div><b>25</b><span>sedes</span></div><div><b>65</b><span>candidatos</span></div><div><b>16&#8239;975,1</b><span>km en candidatos</span></div></div>
+      <div class="stat"><div style="border-color:var(--ok)"><b style="color:var(--ok)">4&#8239;081,4</b><span>km en el plan</span></div><div style="border-color:var(--ok)"><b style="color:var(--ok)">76 %</b><span>menos km</span></div><div><b>24</b><span>tramos del plan</span></div></div>
     </div>
-    {img("L03", "Sedes de Lima y tramos posibles")}
+    {mapa("L03", "Tramos candidatos y plan de FibraNet en Perú", "candidatos")}
   </div>''',
-    "Este es el caso. FibraNet tiene 12 sedes en Lima y un estudio de campo que dio 18 tramos posibles, cada uno con su costo en miles de soles. "
-    "Si tendiéramos todos los tramos gastaríamos 137. Pero para que todas las sedes se comuniquen basta un árbol: 11 tramos, que es n menos 1. "
-    "El mejor árbol cuesta 61, un ahorro de 55,5 por ciento. Ese árbol se llama árbol de expansión mínima, y es lo que calcula nuestro programa.",
-    "Mapa esquemático (no realista) de Lima con 12 sedes como pines: Sede Central, San Isidro, Miraflores, Barranco, Chorrillos, Surco, "
-    "La Molina, Ate, San Juan de Lurigancho, Comas, Los Olivos y Callao. Dibuja SOLO estas 18 líneas, sin agregar otras. "
-    "En granate grueso (las 11 del plan): Miraflores–Barranco, San Isidro–Miraflores, Barranco–Chorrillos, Sede Central–San Isidro, "
-    "Los Olivos–Comas, Miraflores–Surco, Ate–La Molina, San Juan de Lurigancho–Ate, Surco–La Molina, Callao–Los Olivos, Comas–San Juan de Lurigancho. "
-    "En gris punteado (las 7 descartadas): Sede Central–Miraflores, Sede Central–Callao, San Isidro–Surco, Surco–Chorrillos, "
-    "Sede Central–San Juan de Lurigancho, Ate–Sede Central, Callao–San Isidro. "
-    "Los nombres de las sedes pueden aparecer en letras pequeñas y legibles. " + ESTILO_IMG)
+    "Las cuatro propuestas por sede se combinan y se quitan duplicados. Los 65 candidatos suman 16 975,1 km. "
+    "El árbol de 24 tramos suma 4 081,4 km, un 76 por ciento menos en el modelo académico.",
+    "Mapa del Perú con 25 sedes. Destaca los 24 tramos del árbol en granate y los demás candidatos en gris punteado. Sigue el grafo del simulador. " + ESTILO_IMG)
+
 
 # 4 ─ Requerimientos
 lam(1, "El problema", "Requerimientos y alcance", "1:00", '''
@@ -398,20 +395,17 @@ lam(4, "Motor 2 · Kruskal", "Kruskal en Java", "1:20", '''
 
 # 13 ─ Simulador Kruskal
 lam(4, "Motor 2 · Kruskal", "Simulador de Kruskal", "1:40", '''
-  <div class="shd"><div class="eyebrow"><b>11</b> Motor 2 · Kruskal</div><h2 style="font-size:40px">Simulador: Kruskal sobre la red de Lima</h2></div>
+  <div class="shd"><div class="eyebrow"><b>11</b> Motor 2 · Kruskal</div><h2 style="font-size:40px">Simulador: Kruskal en la Red Dorsal</h2></div>
   <div class="sim" id="simK"><div class="bar"></div>
     <div class="body" style="grid-template-columns:1fr 520px">
       <svg style="width:100%;height:100%;background:#fff;border:1.5px solid var(--rule)"></svg>
       <div style="display:flex;flex-direction:column;gap:10px;min-height:0"><div class="stat costo"></div><div class="lista"></div><div class="note"></div></div>
     </div>
   </div>''',
-    "Este es Kruskal con nuestra red real de 12 sedes. A la derecha está la lista de tramos ya ordenada. Voy paso a paso. "
-    "Miraflores–Barranco, costo 2: grupos distintos, se acepta. Siguen San Isidro–Miraflores y Barranco–Chorrillos, ambos con costo 3. "
-    "Los colores de las sedes muestran los grupos de Union-Find. "
-    "Fíjense en Surco–Chorrillos, costo 6: las dos sedes ya están en el mismo grupo, así que se rechaza por ciclo. Lo mismo pasa con Sede Central–Miraflores y San Isidro–Surco. "
-    "En el paso 14 tenemos 11 tramos y un solo grupo: costo 61.",
-    "Esta lámina es un simulador interactivo hecho en HTML; no necesita imagen. Imagen opcional de apoyo: mapa esquemático de Lima con "
-    "tramos de fibra que se encienden en granate uno por uno, del más corto al más largo. " + ESTILO_IMG)
+    "Kruskal ordena los 65 candidatos. Primero acepta Callao–Lima, de 8,3 km. Los colores indican los grupos de Union-Find. "
+    "Si un tramo cierra un ciclo, se descarta. Al completar 24 tramos queda un grupo y el árbol suma 4 081,4 km.",
+    "Simulador interactivo. Imagen opcional: tramos del árbol que se destacan en orden creciente de longitud. " + ESTILO_IMG)
+
 
 # 14 ─ Prim idea
 lam(5, "Motor 3 · Prim", "Prim: la idea", "1:00", f'''
@@ -462,20 +456,17 @@ lam(5, "Motor 3 · Prim", "Prim en Java", "1:20", '''
 
 # 16 ─ Simulador Prim
 lam(5, "Motor 3 · Prim", "Simulador de Prim", "1:40", '''
-  <div class="shd"><div class="eyebrow"><b>14</b> Motor 3 · Prim</div><h2 style="font-size:40px">Simulador: Prim desde Sede Central</h2></div>
+  <div class="shd"><div class="eyebrow"><b>14</b> Motor 3 · Prim</div><h2 style="font-size:40px">Simulador: Prim desde Lima</h2></div>
   <div class="sim" id="simP"><div class="bar"></div>
     <div class="body" style="grid-template-columns:1fr 520px">
       <svg style="width:100%;height:100%;background:#fff;border:1.5px solid var(--rule)"></svg>
       <div style="display:flex;flex-direction:column;gap:10px;min-height:0"><div class="stat costo"></div><div class="lista"></div><div class="note"></div></div>
     </div>
   </div>''',
-    "Ahora Prim con la misma red, empezando en Sede Central. Las sedes en granate ya están en el árbol y los tramos azules están en la cola. "
-    "A la derecha se ve la cola de prioridad con el mínimo arriba. Primer paso: sale Sede Central–San Isidro, costo 4, y San Isidro entra. "
-    "Luego San Isidro–Miraflores con 3, luego Miraflores–Barranco con 2. "
-    "Cuando sale un tramo con las dos puntas adentro, como Sede Central–Miraflores, se descarta. "
-    "Al vaciarse la cola tenemos las 12 sedes y el mismo costo: 61. Los dos algoritmos coinciden.",
-    "Esta lámina es un simulador interactivo hecho en HTML; no necesita imagen. Imagen opcional de apoyo: secuencia de cuatro "
-    "miniaturas donde un árbol granate crece desde una sede central hasta cubrir el mapa. " + ESTILO_IMG)
+    "Prim empieza en Lima y agrega primero el Callao. Los tramos azules esperan en la cola y las sedes en granate ya están dentro del árbol. "
+    "Se descartan los tramos con ambos extremos dentro. Al finalizar, el árbol llega a 25 sedes y suma 4 081,4 km.",
+    "Simulador interactivo. Imagen opcional: secuencia del crecimiento del árbol desde Lima. " + ESTILO_IMG)
+
 
 # 17 ─ Arquitectura y demo
 lam(6, "Resultados", "Arquitectura y demo por consola", "1:20", '''
@@ -483,37 +474,27 @@ lam(6, "Resultados", "Arquitectura y demo por consola", "1:20", '''
   <h2>Arquitectura y demo por consola</h2>
   <div class="cols" style="grid-template-columns:1fr 1.1fr">
     <div style="display:flex;flex-direction:column;gap:10px">
-      <div class="pk"><b>fibranet.Main</b><span>menú 0–9 · Scanner</span></div>
-      <div class="pkrow"><div class="pk"><b>io</b><span>LectorCsv · EscritorCsv · Tabla</span></div><div class="pk acc"><b>motor</b><span>UnionFind · Kruskal · Prim · ResultadoMST</span></div></div>
+      <div class="pk"><b>fibranet.Main</b><span>menú 0–10 · Scanner</span></div>
+      <div class="pkrow"><div class="pk"><b>io</b><span>LectorCoordenadas · LectorCsv</span></div><div class="pk acc"><b>motor</b><span>UnionFind · Kruskal · Prim · ResultadoMST</span></div></div>
       <div class="pk"><b>modelo</b><span>Grafo (listas de adyacencia) · Arista (Comparable)</span></div>
-      <div class="pkrow"><div class="pk gold"><b>pruebas</b><span>31 verificaciones · OK/FALLA</span></div><div class="pk gold"><b>benchmark</b><span>semilla 2026 · CSV</span></div></div>
+      <div class="pkrow"><div class="pk gold"><b>pruebas</b><span>41 verificaciones · OK/FALLA</span></div><div class="pk gold"><b>benchmark</b><span>semilla 2026 · CSV</span></div></div>
       <p style="font-size:17px;color:var(--muted)">Solo librería estándar · <span class="m">javac</span> sin Maven · Java 11+ · repositorio <span class="m">HitLP38/Algoritmia_trabajoF</span></p>
     </div>
-    <div class="dos"><span class="p">Opción: 6</span>
-+-----------+--------+-------------+--------+
-| Algoritmo | Tramos | Costo total | Grupos |
-+-----------+--------+-------------+--------+
-| Kruskal   | 11     | 61.00       | 1      |
-| Prim      | 11     | 61.00       | 1      |
-+-----------+--------+-------------+--------+
-Los dos algoritmos encuentran el mismo
-costo mínimo.
+    <div class="dos"><span class="p">Opción 10 · Red Dorsal Nacional</span>
+capitales_peru.csv
+25 sedes · 65 candidatos · k = 4
 
-<span class="p">Opción: 7</span>
-Sede 1: Callao
-Sede 2: Chorrillos
-<span class="p">Callao y Chorrillos SÍ quedan conectadas.</span>
+<span class="p">Comparación del plan</span>
+Kruskal       24 tramos      4 081,4 km
+Prim          24 tramos      4 081,4 km
+Candidatos    65 tramos     16 975,1 km
 
-<span class="p">Pruebas: 31 OK, 0 FALLA</span></div>
+<span class="p">76 % menos kilómetros en el modelo</span></div>
   </div>''',
-    "El programa está en Java, por consola, en cuatro paquetes. Main tiene el menú. El paquete io lee y escribe CSV y dibuja las tablas. "
-    "El paquete motor tiene los tres algoritmos que acabamos de ver. Y modelo guarda el grafo como listas de adyacencia. "
-    "Aparte están las pruebas, 31 verificaciones que pasan todas, y el benchmark. "
-    "A la derecha, la opción 6 del menú compara Kruskal y Prim sobre la red de Lima: los dos dan 61 con 11 tramos. "
-    "Si da tiempo, hacemos la demo en vivo con el archivo red_ejemplo.csv.",
-    "Diagrama de arquitectura en capas estilo plano técnico: una caja superior 'Main (menú de consola)', debajo dos cajas 'io' y 'motor' "
-    "(motor resaltada en granate), y abajo 'modelo'; a un costado dos cajas doradas 'pruebas' y 'benchmark'. Flechas finas de 'usa a'. "
-    "Junto al diagrama, una ventana de terminal negra con una tabla de texto. " + ESTILO_IMG)
+    "La opción 10 carga las capitales. LectorCoordenadas genera el grafo y el motor calcula ambos planes. "
+    "Kruskal y Prim obtienen la misma longitud mínima para las 25 sedes.",
+    "Diagrama de Main, LectorCoordenadas y Kruskal/Prim junto a la salida resumida de la opción 10. " + ESTILO_IMG)
+
 
 # 18 ─ Benchmark MST
 lam(6, "Resultados", "Benchmark: Kruskal vs Prim", "1:20", f'''
@@ -561,16 +542,16 @@ lam(6, "Resultados", "Conclusiones", "1:00", '''
   <div class="eyebrow"><b>18</b> Resultados</div>
   <h2>Conclusiones y trabajo futuro</h2>
   <div class="cols c3 concl">
-    <div class="panel acc"><span class="tag">1 · Resultado</span><b class="kpi">61 <small>vs 137</small></b><p>FibraNet une 12 sedes con 11 tramos: <b>55,5 % de ahorro</b>.</p></div>
-    <div class="panel acc"><span class="tag">2 · Teoría comprobada</span><b class="kpi">E log V</b><p>Kruskal y Prim dan el mismo costo. Kruskal sigue la cota; Prim denso paga la caché. Union-Find optimizado es casi <b>O(1)</b>.</p></div>
+    <div class="panel acc"><span class="tag">1 · Resultado</span><b class="kpi">4&#8239;081,4 <small>km</small></b><p>24 tramos para 25 sedes. <b>76 % menos km</b> frente a los 16&#8239;975,1 km candidatos.</p></div>
+    <div class="panel acc"><span class="tag">2 · Teoría comprobada</span><b class="kpi">E log V</b><p>Kruskal y Prim dan el mismo costo. En el benchmark denso de 50 000 sedes, Kruskal tardó 284,19 ms y Prim 918,52 ms.</p></div>
     <div class="panel acc"><span class="tag">3 · Cuándo usar cuál</span><b class="kpi">K <small>o</small> P</b><p><b>Kruskal</b> si los tramos llegan como lista; <b>Prim</b> si la red está en adyacencias y es muy densa.</p></div>
   </div>
-  <div class="panel gold"><span class="tag">Trabajo futuro</span><p>Prim con montículo indexado (decrease-key) · redundancia: segundo mejor árbol para respaldo · costos que cambian en el tiempo (ver tema 5.b, Link-Cut Trees).</p></div>''',
-    "Cerramos con tres conclusiones. Primera: para FibraNet el plan cuesta 61 en vez de 137, un ahorro de más de la mitad. "
-    "Segunda: Kruskal y Prim encuentran el mismo costo; Kruskal sigue la cota E log V y Prim, en redes densas grandes, paga además los fallos de caché del montículo. Union-Find optimizado es prácticamente constante. "
+  <div class="panel gold"><span class="tag">Trabajo futuro</span><p>Evaluar trazados de obra, costos por tramo y enlaces de respaldo.</p></div>''',
+    "En el modelo, el plan suma 4 081,4 km frente a 16 975,1 km de todos los candidatos. "
+    "En el benchmark denso de mayor tamaño, Kruskal tardó menos que Prim. Ambos algoritmos tienen cota O(E log V) en estas implementaciones. "
     "Tercera: Kruskal conviene cuando los tramos llegan como una lista, como en nuestro CSV; Prim conviene con redes muy densas ya guardadas como adyacencias. "
-    "Como trabajo futuro: Prim con montículo indexado, un árbol de respaldo y redes que cambian en el tiempo, que es justo nuestro tema 5.b.",
-    "Ilustración de cierre: una red de fibra granate completa sobre un mapa esquemático de Lima, con tres medallas o insignias "
+    "Para un estudio de obra quedan por evaluar trazados, costos por tramo y respaldo.",
+    "Ilustración de cierre: una red de fibra granate completa sobre un mapa esquemático del Perú, con tres medallas o insignias "
     "que representan ahorro, teoría comprobada y elección del algoritmo. " + ESTILO_IMG)
 
 # 21 ─ Referencias
@@ -619,6 +600,10 @@ lam(6, "Cierre", "Preguntas y gracias", "0:30", f'''
 CSS_EXTRA = """
 .cover h1{font-size:120px}
 .imgbox{flex:1;min-height:0;border:1.5px solid var(--rule);background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.mapa-caso{position:relative;min-height:0;border:1.5px solid var(--rule);background:#fff;display:grid}
+.mapa-caso svg{width:100%;height:100%;min-height:0}
+.mapa-caso .imgbox{position:absolute;inset:0;border:0}
+.mapa-caso .imgbox:not(:has(img[src])),.mapa-caso .imgbox.falta{display:none}
 .imgbox img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-in;display:block}
 .imgbox.falta{border-style:dashed;background:repeating-linear-gradient(135deg,#fff 0 14px,var(--oro-soft) 14px 28px)}
 .imgbox .ph{max-width:460px;text-align:center;color:var(--muted);font-size:18px;line-height:1.45;background:#fff;padding:18px 22px;border:1.5px solid var(--oro)}
@@ -653,6 +638,7 @@ svg.mini .lbl{font:600 20px var(--f-body);fill:var(--muted);text-anchor:middle}
 .ufl{font:700 26px var(--f-mono);text-anchor:middle;fill:var(--ink)}
 table.ufregs td{text-align:center;padding:8px 6px}
 table.ufregs td.chg{background:var(--oro-soft);color:var(--granate);font-weight:700}
+.tr.oculto{display:none}
 .tr{stroke:#C9D1DA;stroke-width:3;stroke-dasharray:6 6}
 .tr.acc{stroke:var(--granate);stroke-width:7;stroke-dasharray:none}
 .tr.rej{stroke:#C0562F;stroke-width:3;stroke-dasharray:3 7;opacity:.7}
@@ -663,11 +649,11 @@ table.ufregs td.chg{background:var(--oro-soft);color:var(--granate);font-weight:
 .cl.acc rect{stroke:var(--granate);fill:var(--granate-soft)}.cl.acc text{fill:var(--granate)}
 .cl.cur rect{fill:var(--oro-soft);stroke:var(--one)}
 .sd{stroke:var(--ink);stroke-width:2.5}
-.sdl{font:600 16px var(--f-body);text-anchor:middle;fill:var(--ink);paint-order:stroke;stroke:#fff;stroke-width:5px}
+.sdl{font:600 13px var(--f-body);text-anchor:middle;fill:var(--ink);paint-order:stroke;stroke:#fff;stroke-width:5px}
 .sim .stat b{font-size:38px}
-.lista{display:flex;flex-direction:column;gap:3px;font-size:15px;overflow:auto;min-height:0;flex:1}
+.lista{position:relative;display:flex;flex-direction:column;gap:3px;font-size:15px;overflow:auto;min-height:0;flex:1}
 .lista .tag{margin:0 0 2px}
-.lista .it{display:grid;grid-template-columns:30px 1fr auto;gap:8px;padding:2px 8px;border:1px solid var(--grid);background:var(--sheet)}
+.lista .it{display:grid;grid-template-columns:64px 1fr auto;gap:8px;padding:2px 8px;border:1px solid var(--grid);background:var(--sheet)}
 .lista .it span{font-family:var(--f-mono);font-weight:700}
 .lista .it b{font:600 13px var(--f-mono)}
 .lista .it.acc{border-color:var(--granate);background:var(--granate-soft)}.lista .it.acc b{color:var(--granate)}
@@ -699,7 +685,12 @@ def construir_html():
                 slides=[dict(owner=l["owner"], block=l["block"], title=l["title"], time=l["time"], notes=l["notes"]) for l in L])
     secciones = "\n".join(
         f'<section class="slide {l["cls"]}"{" data-nocaj=\"1\"" if l["nocaj"] else ""}>{l["html"]}\n</section>' for l in L)
-    js = ("const META = " + json.dumps(meta, ensure_ascii=False) + ";\n"
+    import csv
+    with open(os.path.join(COD, "datos", "capitales_peru.csv"), encoding="utf-8", newline="") as archivo:
+        capitales = [[fila["capital"], float(fila["latitud"]), float(fila["longitud"])]
+                     for fila in csv.DictReader(archivo)]
+    js = ("const CAPITALES = " + json.dumps(capitales, ensure_ascii=False) + ";\n"
+          "const META = " + json.dumps(meta, ensure_ascii=False) + ";\n"
           "// Códigos de alumno: escríbalos en META.codes, en el mismo orden que META.team.\n"
           "const CODIGO = " + json.dumps(CODIGO, ensure_ascii=False) + ";\n"
           "const BENCH = " + json.dumps(BENCH, ensure_ascii=False) + ";\n")
@@ -787,8 +778,11 @@ def guiones():
 if __name__ == "__main__":
     # python deck_5a.py FibraNet_Slides_v2.html  -> guarda una versión nueva sin pisar la anterior
     salida = sys.argv[1] if len(sys.argv) > 1 else "FibraNet_Slides.html"
-    escribir(os.path.join(TEMA, "03_ppt", salida), construir_html())
+    ruta = os.path.join(TEMA, "03_ppt", salida)
+    with open(ruta, "x", encoding="utf-8", newline="\n") as archivo:
+        archivo.write(construir_html())
     os.makedirs(os.path.join(TEMA, "03_ppt", "img"), exist_ok=True)
-    prompts()
-    guiones()
-    print("Deck, prompts y guiones generados:", len(L), "láminas")
+    if "--solo-deck" not in sys.argv[2:]:
+        prompts()
+        guiones()
+    print("Deck generado:", len(L), "láminas")

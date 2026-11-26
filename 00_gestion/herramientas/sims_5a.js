@@ -88,26 +88,59 @@ const copiaUF = uf => ({ padre: [...uf.padre], rango: [...uf.rango] });
   });
 })();
 
-/* ---------- Red de ejemplo de Lima (datos/red_ejemplo.csv) ---------- */
-const SEDES = { "Sede Central": [4, 5], "San Isidro": [3.4, 3.8], "Miraflores": [3.6, 2.6], "Barranco": [3.2, 1.5], "Chorrillos": [4.2, 0.7], "Surco": [5, 2.2], "La Molina": [6.6, 2.6], "Ate": [6.8, 4], "SJL": [6.2, 5.6], "Comas": [4.4, 7], "Los Olivos": [2.6, 6.6], "Callao": [1.4, 5] };
-const NOMBRES = Object.keys(SEDES);
-const TRAMOS = [["Sede Central", "San Isidro", 4], ["Sede Central", "Miraflores", 7], ["Sede Central", "Callao", 12], ["San Isidro", "Miraflores", 3], ["San Isidro", "Surco", 9], ["Miraflores", "Surco", 5], ["Miraflores", "Barranco", 2], ["Barranco", "Chorrillos", 3], ["Surco", "Chorrillos", 6], ["Surco", "La Molina", 8], ["Callao", "Los Olivos", 10], ["Los Olivos", "Comas", 4], ["Comas", "SJL", 11], ["Sede Central", "SJL", 14], ["SJL", "Ate", 6], ["Ate", "La Molina", 5], ["Ate", "Sede Central", 13], ["Callao", "San Isidro", 15]]
-  .map(([a, b, c], k) => ({ a: NOMBRES.indexOf(a), b: NOMBRES.indexOf(b), c, k }));
-const PX = v => 50 + (SEDES[NOMBRES[v]][0] - 1.2) * 108, PY = v => 34 + (7.3 - SEDES[NOMBRES[v]][1]) * 74;
+/* ---------- Caso Red Dorsal Nacional ---------- */
+const NOMBRES = CAPITALES.map(([nombre]) => nombre === "Huanuco" ? "Huánuco" : nombre);
+const rad = grados => grados * Math.PI / 180;
+const formatoKm = new Intl.NumberFormat("es-PE", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const km = valor => formatoKm.format(valor).replace(/,/g, "\u202f").replace(".", ",");
+function distancia([, latA, lonA], [, latB, lonB]) {
+  const a = Math.sin(rad(latB - latA) / 2) ** 2
+    + Math.cos(rad(latA)) * Math.cos(rad(latB)) * Math.sin(rad(lonB - lonA) / 2) ** 2;
+  return 6371 * 2 * Math.asin(Math.sqrt(a));
+}
+const TRAMOS = [];
+const pares = new Set();
+CAPITALES.forEach((sede, a) => {
+  const vecinos = CAPITALES.map((otra, b) => ({ b, d: distancia(sede, otra) }))
+    .filter(({ b }) => a !== b).sort((x, y) => x.d - y.d || x.b - y.b).slice(0, 4);
+  vecinos.forEach(({ b, d }) => {
+    const clave = a < b ? a + "-" + b : b + "-" + a;
+    if (pares.has(clave)) return;
+    pares.add(clave);
+    TRAMOS.push({ a, b, c: Math.max(0.1, Math.round(d * 10) / 10), k: TRAMOS.length });
+  });
+});
+const TOTAL_TRAMOS = TRAMOS.reduce((total, t) => total + t.c, 0);
+const xMapa = lon => 134 + (lon + 82) * 29;
+const yMapa = lat => 20 - lat * 28;
+const PX = v => xMapa(CAPITALES[v][2]);
+const PY = v => yMapa(CAPITALES[v][1]);
+// Contorno administrativo generalizado de Natural Earth, escala 1:110 millones.
+const CONTORNO = [[-69.894,-4.298],[-70.795,-4.251],[-70.929,-4.402],[-71.748,-4.594],[-72.892,-5.275],[-72.965,-5.741],[-73.22,-6.089],[-73.12,-6.63],[-73.724,-6.919],[-73.723,-7.341],[-73.987,-7.524],[-73.571,-8.424],[-73.015,-9.033],[-73.227,-9.462],[-72.563,-9.52],[-72.185,-10.054],[-71.302,-10.079],[-70.482,-9.49],[-70.549,-11.009],[-70.094,-11.124],[-69.53,-10.952],[-68.665,-12.561],[-68.88,-12.9],[-68.929,-13.603],[-68.949,-14.454],[-69.34,-14.953],[-69.16,-15.324],[-69.39,-15.66],[-68.96,-16.501],[-69.59,-17.58],[-69.858,-18.093],[-70.373,-18.348],[-71.375,-17.774],[-71.462,-17.363],[-73.445,-16.359],[-75.238,-15.266],[-76.009,-14.649],[-76.423,-13.823],[-76.259,-13.535],[-77.106,-12.223],[-78.092,-10.378],[-79.037,-8.387],[-79.446,-7.931],[-79.761,-7.194],[-80.537,-6.542],[-81.25,-6.137],[-80.926,-5.691],[-81.411,-4.737],[-81.1,-4.036],[-80.303,-3.405],[-80.184,-3.821],[-80.469,-4.059],[-80.442,-4.426],[-80.029,-4.346],[-79.625,-4.454],[-79.205,-4.959],[-78.64,-4.548],[-78.451,-3.873],[-77.838,-3.003],[-76.635,-2.609],[-75.545,-1.562],[-75.234,-0.911],[-75.373,-0.152],[-75.107,-0.057],[-74.442,-0.531],[-74.122,-1.003],[-73.66,-1.26],[-73.07,-2.309],[-72.326,-2.434],[-71.775,-2.17],[-71.414,-2.343],[-70.813,-2.257],[-70.048,-2.725],[-70.693,-3.743],[-70.394,-3.767],[-69.894,-4.298]];
 const COLORES = ["#8A1D2C", "#1F5FA8", "#2F7D4F", "#A87A22", "#6B3FA0", "#C0562F", "#2B8A8A", "#7A7A2A", "#A03F6B", "#3F5F2F", "#5F3F2F", "#2F3F6F"];
-function dibujarRed(svg, estadoTramo, colorSede, etiquetas = true) {
-  let g = "";
-  TRAMOS.forEach((t, i) => {
-    const e = estadoTramo[i] || "";
-    g += `<line x1="${PX(t.a)}" y1="${PY(t.a)}" x2="${PX(t.b)}" y2="${PY(t.b)}" class="tr ${e}"/>`;
-    g += `<g class="cl ${e}"><rect x="${(PX(t.a) + PX(t.b)) / 2 - 15}" y="${(PY(t.a) + PY(t.b)) / 2 - 13}" width="30" height="24" rx="4"/><text x="${(PX(t.a) + PX(t.b)) / 2}" y="${(PY(t.a) + PY(t.b)) / 2 + 5}">${t.c}</text></g>`;
+const AJUSTES = {
+  Callao: [-37, 9], Lima: [27, 8], Huancayo: [39, 1], Huancavelica: [-63, 13],
+  Ayacucho: [-5, 26], Ica: [-13, 10], Cajamarca: [-48, 9], Trujillo: [-32, 9],
+  Chiclayo: [-33, -7], Chachapoyas: [13, 21], Moyobamba: [40, -9], Huánuco: [38, -10],
+  "Cerro de Pasco": [62, 4], Cusco: [21, 1], Abancay: [1, -16], Arequipa: [-31, -5],
+  Moquegua: [-46, 3], Tacna: [25, 4], "Puerto Maldonado": [66, -6]
+};
+function dibujarRed(svg, estadoTramo, colorSede) {
+  const puntos = CONTORNO.map(([lon, lat]) => [xMapa(lon), yMapa(lat)].join(",")).join(" ");
+  let g = '<polygon points="' + puntos + '" fill="var(--sheet)" stroke="var(--rule)" stroke-width="1.5"/>';
+  const orden = [...TRAMOS].sort((a,b) => Number(!!estadoTramo[a.k]?.trim()) - Number(!!estadoTramo[b.k]?.trim()));
+  orden.forEach(t => {
+    const e = estadoTramo[t.k] || "";
+    g += '<line x1="' + PX(t.a) + '" y1="' + PY(t.a) + '" x2="' + PX(t.b) + '" y2="' + PY(t.b) + '" class="tr ' + e + '"/>';
   });
   NOMBRES.forEach((n, v) => {
-    const col = colorSede(v);
-    g += `<circle cx="${PX(v)}" cy="${PY(v)}" r="15" class="sd" style="fill:${col || "#fff"}"/>`;
-    if (etiquetas) g += `<text x="${PX(v)}" y="${PY(v) - 22}" class="sdl">${n}</text>`;
+    const [dx, dy] = AJUSTES[n] || [0, -10];
+    const x = PX(v), y = PY(v);
+    g += '<g><title>' + n + '</title><circle cx="' + x + '" cy="' + y + '" r="4.5" class="sd" style="fill:' + (colorSede(v) || "#fff") + '"/>';
+    g += '<text x="' + (x + dx) + '" y="' + (y + dy) + '" class="sdl">' + n + '</text></g>';
   });
-  svg.setAttribute("viewBox", "0 0 700 560"); svg.innerHTML = g;
+  svg.setAttribute("viewBox", "0 0 700 560");
+  svg.innerHTML = g;
 }
 
 /* ---------- 2. Simulador de Kruskal ---------- */
@@ -116,7 +149,7 @@ function dibujarRed(svg, estadoTramo, colorSede, etiquetas = true) {
   const orden = [...TRAMOS].sort((x, y) => x.c - y.c || x.k - y.k);   // orden estable, como Collections.sort
   const uf = ufNuevo(NOMBRES.length), estado = {};
   let costo = 0, aceptados = 0;
-  const pasos = [{ estado: {}, uf: copiaUF(uf), costo: 0, actual: -1, nota: "Se ordenan los 18 tramos por costo. Cada sede empieza como su propio grupo (12 grupos)." }];
+  const pasos = [{ estado: {}, uf: copiaUF(uf), costo: 0, actual: -1, nota: "Se ordenan 65 tramos por distancia. Cada sede empieza como su propio grupo." }];
   for (const t of orden) {
     if (aceptados === NOMBRES.length - 1) break;
     const ra = ufFind(uf, t.a), rb = ufFind(uf, t.b);
@@ -124,20 +157,26 @@ function dibujarRed(svg, estadoTramo, colorSede, etiquetas = true) {
     if (ok) { estado[t.k] = "acc"; costo += t.c; aceptados++; } else estado[t.k] = "rej";
     pasos.push({
       estado: { ...estado }, uf: copiaUF(uf), costo, actual: t.k,
-      nota: ok ? `${NOMBRES[t.a]} – ${NOMBRES[t.b]} (${t.c}): find da grupos distintos (${NOMBRES[ra]} y ${NOMBRES[rb]}) → ACEPTADO y se unen. Costo acumulado: ${costo}.`
-        : `${NOMBRES[t.a]} – ${NOMBRES[t.b]} (${t.c}): las dos sedes ya están en el grupo de ${NOMBRES[ra]} → RECHAZADO, cerraría un ciclo.`
+      nota: ok ? `${NOMBRES[t.a]} – ${NOMBRES[t.b]} (${km(t.c)} km): find da grupos distintos (${NOMBRES[ra]} y ${NOMBRES[rb]}) → ACEPTADO y se unen. Costo acumulado: ${km(costo)} km.`
+        : `${NOMBRES[t.a]} – ${NOMBRES[t.b]} (${km(t.c)} km): las dos sedes ya están en el grupo de ${NOMBRES[ra]} → RECHAZADO, cerraría un ciclo.`
     });
   }
-  pasos[pasos.length - 1].nota += ` Ya hay ${NOMBRES.length - 1} tramos: el árbol está completo. Costo mínimo = ${costo} (de 137).`;
+  pasos[pasos.length - 1].nota += ` Ya hay ${NOMBRES.length - 1} tramos: el árbol está completo. Longitud mínima = ${km(costo)} km (de ${km(TOTAL_TRAMOS)} km).`;
+  document.querySelectorAll("[data-red]").forEach(mapa => {
+    const final = Object.fromEntries(TRAMOS.map(t => [t.k, estado[t.k] === "acc" ? "acc" : mapa.dataset.red === "plan" ? "oculto" : ""]));
+    dibujarRed(mapa, final, () => "#fff");
+  });
   const svg = box.querySelector("svg"), lista = box.querySelector(".lista"), nota = box.querySelector(".note"), cst = box.querySelector(".costo");
   montarSim(box, pasos, p => {
     const est = {}; TRAMOS.forEach(t => { est[t.k] = (p.estado[t.k] || "") + (t.k === p.actual ? " cur" : ""); });
     const grupos = {}; p.uf.padre.forEach((_, v) => { const r = ufFind(copiaUF(p.uf), v); (grupos[r] = grupos[r] || []).push(v); });
     const colorDe = {}; let k = 0; Object.values(grupos).forEach(g => { if (g.length > 1) g.forEach(v => colorDe[v] = COLORES[k]); if (g.length > 1) k++; });
     dibujarRed(svg, est, v => colorDe[v]);
-    lista.innerHTML = orden.map(t => `<div class="it ${p.estado[t.k] || ""} ${t.k === p.actual ? "cur" : ""}"><span>${t.c}</span>${NOMBRES[t.a]} – ${NOMBRES[t.b]}<b>${p.estado[t.k] === "acc" ? "✔" : p.estado[t.k] === "rej" ? "✘ ciclo" : ""}</b></div>`).join("");
+    lista.innerHTML = orden.map(t => `<div class="it ${p.estado[t.k] || ""} ${t.k === p.actual ? "cur" : ""}"><span>${km(t.c)}</span>${NOMBRES[t.a]} – ${NOMBRES[t.b]}<b>${p.estado[t.k] === "acc" ? "✔" : p.estado[t.k] === "rej" ? "✘ ciclo" : ""}</b></div>`).join("");
+    const fila = lista.querySelector(".cur");
+    lista.scrollTop = fila ? fila.offsetTop - lista.clientHeight / 2 + fila.clientHeight / 2 : 0;
     nota.textContent = p.nota;
-    cst.innerHTML = `<div><b>${p.costo}</b><span>costo acumulado</span></div><div><b>${Object.keys(grupos).length}</b><span>grupos (find)</span></div>`;
+    cst.innerHTML = `<div><b>${km(p.costo)}</b><span>km acumulados</span></div><div><b>${Object.keys(grupos).length}</b><span>grupos (find)</span></div>`;
   });
 })();
 
@@ -149,27 +188,27 @@ function dibujarRed(svg, estadoTramo, colorSede, etiquetas = true) {
   let costo = 0, orden = 0;
   const otro = (t, v) => t.a === v ? t.b : t.a;
   const visitar = v => { enArbol[v] = true; ady[v].forEach(t => { if (!enArbol[otro(t, v)]) { cola.push({ t, o: orden++ }); if (!estado[t.k]) estado[t.k] = "cola"; } }); };
-  const s0 = NOMBRES.indexOf("Sede Central");
+  const s0 = NOMBRES.indexOf("Lima");
   visitar(s0);
   const foto = (nota, actual) => ({ estado: { ...estado }, arbol: [...enArbol], cola: cola.map(x => x.t).sort((x, y) => x.c - y.c), costo, actual, nota });
-  const pasos = [foto(`Se empieza en Sede Central: entra al árbol y sus ${ady[s0].length} tramos van a la cola de prioridad.`, -1)];
+  const pasos = [foto(`Se empieza en Lima: entra al árbol y sus ${ady[s0].length} tramos van a la cola de prioridad.`, -1)];
   while (cola.length) {
     cola.sort((x, y) => x.t.c - y.t.c || x.o - y.o);
     const { t } = cola.shift();
-    if (enArbol[t.a] && enArbol[t.b]) { if (estado[t.k] === "cola") estado[t.k] = "rej"; pasos.push(foto(`Sale ${NOMBRES[t.a]} – ${NOMBRES[t.b]} (${t.c}), pero sus dos sedes ya están en el árbol: se descarta.`, t.k)); continue; }
+    if (enArbol[t.a] && enArbol[t.b]) { if (estado[t.k] === "cola") estado[t.k] = "rej"; pasos.push(foto(`Sale ${NOMBRES[t.a]} – ${NOMBRES[t.b]} (${km(t.c)} km), pero sus dos sedes ya están en el árbol: se descarta.`, t.k)); continue; }
     const nueva = enArbol[t.a] ? t.b : t.a;
     estado[t.k] = "acc"; costo += t.c; visitar(nueva);
     // los tramos que quedaron con ambos extremos dentro siguen en la cola (perezoso)
-    pasos.push(foto(`Sale el más barato que llega afuera: ${NOMBRES[otro(t, nueva)]} – ${NOMBRES[nueva]} (${t.c}). ${NOMBRES[nueva]} entra al árbol y sus tramos hacia afuera van a la cola. Costo: ${costo}.`, t.k));
+    pasos.push(foto(`Sale el más barato que llega afuera: ${NOMBRES[otro(t, nueva)]} – ${NOMBRES[nueva]} (${km(t.c)} km). ${NOMBRES[nueva]} entra al árbol y sus tramos hacia afuera van a la cola. Costo: ${km(costo)} km.`, t.k));
   }
-  pasos[pasos.length - 1].nota += " La cola quedó vacía: árbol completo con costo 61, igual que Kruskal.";
+  pasos[pasos.length - 1].nota += " La cola quedó vacía: árbol completo con " + km(costo) + " km, igual que Kruskal.";
   const svg = box.querySelector("svg"), lista = box.querySelector(".lista"), nota = box.querySelector(".note"), cst = box.querySelector(".costo");
   montarSim(box, pasos, p => {
     const est = {}; TRAMOS.forEach(t => est[t.k] = (p.estado[t.k] || "") + (t.k === p.actual ? " cur" : ""));
     dibujarRed(svg, est, v => p.arbol[v] ? "#8A1D2C" : null);
-    lista.innerHTML = `<div class="tag">Cola de prioridad (mínimo arriba)</div>` + (p.cola.length ? p.cola.slice(0, 9).map((t, i) => `<div class="it ${i === 0 ? "top" : ""} ${p.arbol[t.a] && p.arbol[t.b] ? "obs" : ""}"><span>${t.c}</span>${NOMBRES[t.a]} – ${NOMBRES[t.b]}</div>`).join("") + (p.cola.length > 9 ? `<div class="it mas">… y ${p.cola.length - 9} más</div>` : "") : `<div class="it mas">(vacía)</div>`);
+    lista.innerHTML = `<div class="tag">Cola de prioridad (mínimo arriba)</div>` + (p.cola.length ? p.cola.slice(0, 9).map((t, i) => `<div class="it ${i === 0 ? "top" : ""} ${p.arbol[t.a] && p.arbol[t.b] ? "obs" : ""}"><span>${km(t.c)}</span>${NOMBRES[t.a]} – ${NOMBRES[t.b]}</div>`).join("") + (p.cola.length > 9 ? `<div class="it mas">… y ${p.cola.length - 9} más</div>` : "") : `<div class="it mas">(vacía)</div>`);
     nota.textContent = p.nota;
-    cst.innerHTML = `<div><b>${p.costo}</b><span>costo acumulado</span></div><div><b>${p.arbol.filter(Boolean).length} / 12</b><span>sedes en el árbol</span></div>`;
+    cst.innerHTML = `<div><b>${km(p.costo)}</b><span>km acumulados</span></div><div><b>${p.arbol.filter(Boolean).length} / ${NOMBRES.length}</b><span>sedes en el árbol</span></div>`;
   });
 })();
 
