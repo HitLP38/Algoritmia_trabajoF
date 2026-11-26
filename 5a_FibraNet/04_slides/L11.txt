@@ -1,0 +1,11 @@
+Lámina 11 · Kruskal: la idea
+Expone: Cerron Arica, Gianpierre Eyner
+
+Esta imagen SE USA en la lámina. Guárdela como:
+  5a_FibraNet\03_ppt\img\L11.png
+
+PROMPT PARA CHATGPT (copiar desde aquí):
+
+Ilustración de Kruskal como islas que se fusionan: varios grupos pequeños de nodos de colores distintos que se van uniendo con puentes de fibra granate, empezando por los puentes más cortos; un puente que uniría dos nodos del mismo color aparece tachado. Al costado, una pila de tarjetas ordenadas por número (costos). Estilo: ilustración plana de arquitectura técnica, fondo blanco con cuadrícula gris muy tenue, colores granate #8A1D2C, dorado #A87A22, azul #1F5FA8 y gris pizarra #152131, líneas limpias, sin sombras exageradas, sin texto incrustado salvo el que se indique, formato horizontal 16:9, alta resolución.
+
+Si la imagen sale con texto deformado, pida: "Repite la imagen sin ningún texto".

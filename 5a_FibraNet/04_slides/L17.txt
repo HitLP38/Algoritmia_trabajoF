@@ -1,0 +1,11 @@
+Lámina 17 · Arquitectura y demo por consola
+Expone: Loli Aldunate, Cesar Antoni
+
+Esta lámina ya es visual en el HTML (código, simulador, tabla o gráfico). La imagen es OPCIONAL:
+úsela como apoyo en el informe o en un póster; si la genera, guárdela como 5a_FibraNet\03_ppt\img\L17.png.
+
+PROMPT PARA CHATGPT (copiar desde aquí):
+
+Diagrama de arquitectura en capas estilo plano técnico: una caja superior 'Main (menú de consola)', debajo dos cajas 'io' y 'motor' (motor resaltada en granate), y abajo 'modelo'; a un costado dos cajas doradas 'pruebas' y 'benchmark'. Flechas finas de 'usa a'. Junto al diagrama, una ventana de terminal negra con una tabla de texto. Estilo: ilustración plana de arquitectura técnica, fondo blanco con cuadrícula gris muy tenue, colores granate #8A1D2C, dorado #A87A22, azul #1F5FA8 y gris pizarra #152131, líneas limpias, sin sombras exageradas, sin texto incrustado salvo el que se indique, formato horizontal 16:9, alta resolución.
+
+Si la imagen sale con texto deformado, pida: "Repite la imagen sin ningún texto".
