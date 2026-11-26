@@ -50,8 +50,8 @@ No incluye:
 | RF-04 | **Conectar** un tramo entre dos nodos (`link`). Si ambos ya están en el mismo árbol, el tramo se rechaza porque cerraría un anillo. | Alta |
 | RF-05 | **Cortar** un tramo existente (`cut`), por falla o mantenimiento. Si el tramo no existe, se informa. | Alta |
 | RF-06 | **Consultar si un cliente tiene luz**: `connected(cliente, FUENTE)`. | Alta |
-| RF-07 | **Consultar la ruta de alimentación** de un cliente con luz: distancia total en km y número de tramos hasta su subestación (suma y conteo sobre el camino). | Alta |
-| RF-08 | Consultar si dos nodos cualesquiera están en la misma zona (mismo árbol). | Media |
+| RF-07 | **Consultar la ruta de alimentación** de un cliente con luz: la subestación que lo alimenta, la distancia total en km y el número de tramos hasta ella (suma y conteo sobre el camino). Como la red es un bosque, entre un cliente y su subestación hay un solo camino, así que la subestación identifica la ruta. Listar nodo por nodo ese camino queda fuera del alcance. | Alta |
+| RF-08 | Consultar si dos nodos cualesquiera están en la misma zona: conectados por tramos físicos, **sin contar** las uniones virtuales con FUENTE. Dos clientes alimentados por subestaciones distintas **no** están en la misma zona. | Media |
 | RF-09 | Procesar un archivo de eventos en lote (`CONECTAR`, `CORTAR`, `LUZ`, `RUTA`) y mostrar una tabla con el resultado de cada evento. | Alta |
 | RF-10 | Mostrar el estado de la red: número de nodos, tramos activos y lista de tramos. | Media |
 | RF-11 | Mostrar el paso a paso de una operación (accesos, rotaciones y splays) para usarlo en la exposición. | Media |
@@ -105,7 +105,7 @@ No incluye:
 ### CU-05 · Consultar la ruta de alimentación
 - Actor: Agente de atención
 - Precondición: el cliente tiene luz.
-- Flujo principal: el sistema hace `makeRoot(FUENTE)` y `access(cliente)` y lee del árbol splay la suma de km y el número de tramos del camino.
+- Flujo principal: el sistema hace `makeRoot(FUENTE)` y `access(cliente)` y lee del árbol splay la subestación (el nodo del camino que cuelga de FUENTE), la suma de km y el número de tramos del camino.
 - Flujo alterno: el cliente no tiene luz; se informa y no se calcula la ruta.
 
 ### CU-06 · Procesar eventos en lote
