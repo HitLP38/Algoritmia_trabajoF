@@ -1,0 +1,7 @@
+origen,destino,costo
+Lima,Callao,12
+Lima,Lima,5
+Lima,Ate,-3
+Callao,Ate,abc
+Ate,Surco
+Surco,Lima,7.5
