@@ -34,7 +34,7 @@ Para resolverlo, primero modelamos. Cada sede es un vértice, cada tramo posible
 
 ### Lámina 07 · Especificación y complejidad (1:10)
 
-Formalmente, la entrada es un grafo con pesos no negativos y la salida un subconjunto de aristas de costo mínimo, sin ciclos. Si el grafo es conexo da V menos 1 aristas; si no, da un árbol por componente. El invariante que garantiza la correctitud es que el conjunto elegido siempre está contenido en algún árbol mínimo. En costo: Kruskal es E log E por el ordenamiento, Prim con montículo es E log V, y como E es a lo más V al cuadrado, log E es a lo más 2 log V, así que son del mismo orden. Union-Find optimizado cuesta alfa de n amortizado, que en la práctica es una constante menor o igual a 4.
+Formalmente, la entrada es un grafo con pesos no negativos y la salida un subconjunto de aristas de costo mínimo, sin ciclos. Si el grafo es conexo da V menos 1 aristas; si no, da un árbol por componente. El invariante que garantiza la correctitud es que el conjunto elegido siempre está contenido en algún bosque de expansión mínima; si la red es conexa, ese bosque es un árbol. En costo: los dos pagan V por recorrer las sedes; Kruskal suma E log E por el ordenamiento y Prim con montículo E log V. Si no hay tramos repetidos entre el mismo par de sedes, E es a lo más V al cuadrado y log E es a lo más 2 log V, así que son del mismo orden. Union-Find optimizado cuesta alfa de n amortizado, que en la práctica es una constante menor o igual a 4.
 
 *Pase:* "Ahora Javier les explica union-find."
 
@@ -94,15 +94,15 @@ El programa está en Java, por consola, en cuatro paquetes. Main tiene el menú.
 
 ### Lámina 18 · Benchmark: Kruskal vs Prim (1:20)
 
-Para el benchmark generamos redes al azar con semilla fija 2026, desde mil hasta cincuenta mil sedes, dispersas y densas. Cada medición tiene dos corridas de calentamiento y es el promedio de cinco corridas. Las dos curvas crecen casi en línea con E log V, como predice la teoría: dividimos el tiempo entre E log V y el cociente se mantiene estable. En redes densas Kruskal sale más rápido, porque ordenar un arreglo es muy eficiente en Java y Prim hace muchas operaciones en el montículo.
+Para el benchmark generamos redes al azar con semilla fija 2026, desde mil hasta cincuenta mil sedes, dispersas y densas. Cada medición tiene dos corridas de calentamiento y es el promedio de cinco corridas. Para contrastar con la teoría dividimos el tiempo entre E log V. En Kruskal ese cociente no crece, así que sigue la cota. En Prim con redes densas el cociente sube de unos 32 a unos 75 nanosegundos: el orden sigue siendo E log V, pero el montículo con cientos de miles de tramos ya no cabe en la memoria caché y cada operación cuesta más. Por eso en redes densas Kruskal sale más rápido: con cincuenta mil sedes, 284 milisegundos contra 919 de Prim.
 
 ### Lámina 19 · Benchmark: Union-Find (1:10)
 
-Aquí comparamos Union-Find sin optimizar contra el optimizado, en escala logarítmica en los dos ejes. La versión ingenua crece en línea recta: cada vez que n se duplica, el costo por operación también, porque los árboles se vuelven listas largas. La versión con compresión y unión por rango se mantiene casi plana, entre 3 y 5 nanosegundos por operación, incluso con un millón de elementos. Con veinte mil elementos ya es unas tres mil veces más rápida. Eso confirma en la práctica que alfa de n se comporta como una constante.
+Aquí comparamos Union-Find sin optimizar contra el optimizado, en escala logarítmica en los dos ejes. La versión ingenua crece en línea recta: cada vez que n se duplica, el costo por operación también, porque los árboles se vuelven listas largas. La versión con compresión y unión por rango se mantiene casi plana, entre 5 y 8 nanosegundos por operación desde cinco mil hasta un millón de elementos. Con veinte mil elementos ya es unas 2 900 veces más rápida. Eso confirma en la práctica que alfa de n se comporta como una constante.
 
 ### Lámina 20 · Conclusiones (1:00)
 
-Cerramos con tres conclusiones. Primera: para FibraNet el plan cuesta 61 en vez de 137, un ahorro de más de la mitad. Segunda: los experimentos confirman la teoría: Kruskal y Prim encuentran el mismo costo, crecen como E log V, y Union-Find optimizado es prácticamente constante. Tercera: Kruskal conviene cuando los tramos llegan como una lista, como en nuestro CSV; Prim conviene con redes muy densas ya guardadas como adyacencias. Como trabajo futuro: Prim con montículo indexado, un árbol de respaldo y redes que cambian en el tiempo, que es justo nuestro tema 5.b.
+Cerramos con tres conclusiones. Primera: para FibraNet el plan cuesta 61 en vez de 137, un ahorro de más de la mitad. Segunda: Kruskal y Prim encuentran el mismo costo; Kruskal sigue la cota E log V y Prim, en redes densas grandes, paga además los fallos de caché del montículo. Union-Find optimizado es prácticamente constante. Tercera: Kruskal conviene cuando los tramos llegan como una lista, como en nuestro CSV; Prim conviene con redes muy densas ya guardadas como adyacencias. Como trabajo futuro: Prim con montículo indexado, un árbol de respaldo y redes que cambian en el tiempo, que es justo nuestro tema 5.b.
 
 ### Lámina 21 · Referencias (0:20)
 

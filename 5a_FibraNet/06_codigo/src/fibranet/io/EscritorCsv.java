@@ -9,7 +9,7 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Locale;
+import java.math.BigDecimal;
 
 /**
  * Escribe el plan de tendido en un CSV (RF-12) con el mismo formato
@@ -28,8 +28,12 @@ public final class EscritorCsv {
         try (PrintWriter salida = new PrintWriter(Files.newBufferedWriter(ruta, StandardCharsets.UTF_8))) {
             salida.println("origen,destino,costo");
             for (Arista arista : plan.tramosElegidos) {
-                salida.printf(Locale.US, "%s,%s,%.2f%n",
-                        grafo.nombre(arista.origen), grafo.nombre(arista.destino), arista.costo);
+                // costo completo (sin redondear a 2 decimales) para que el plan se pueda volver a cargar igual
+                salida.println(grafo.nombre(arista.origen) + "," + grafo.nombre(arista.destino) + ","
+                        + BigDecimal.valueOf(arista.costo).stripTrailingZeros().toPlainString());
+            }
+            if (salida.checkError()) {                     // PrintWriter no lanza excepciones: se revisa aquí
+                throw new IOException("falló la escritura de " + ruta);
             }
         }
     }

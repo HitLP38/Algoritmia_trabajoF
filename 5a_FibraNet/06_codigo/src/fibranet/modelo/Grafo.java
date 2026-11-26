@@ -1,6 +1,7 @@
 package fibranet.modelo;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,12 +67,13 @@ public class Grafo {
         return (indice == null) ? -1 : indice;
     }
 
+    /** Vista de solo lectura: los cambios se hacen con agregarTramo. */
     public List<Arista> aristas() {
-        return aristas;
+        return Collections.unmodifiableList(aristas);
     }
 
     public List<Arista> tramosDe(int sede) {
-        return adyacencia.get(sede);
+        return Collections.unmodifiableList(adyacencia.get(sede));
     }
 
     public double costoTotalDeTodosLosTramos() {

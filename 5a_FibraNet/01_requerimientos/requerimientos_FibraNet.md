@@ -36,7 +36,7 @@ No incluye:
 
 | ID | Requerimiento | Prioridad |
 |---|---|---|
-| RF-01 | Cargar la red desde un archivo CSV con columnas `origen,destino,costo` (una fila por tramo; las sedes se deducen de los nombres). | Alta |
+| RF-01 | Cargar la red desde un archivo CSV con columnas `origen,destino,costo` (una fila por tramo; las sedes se deducen de los nombres). Una fila con un solo nombre declara una sede sin tramos; toda sede declarada aparece en los grupos del RF-10. | Alta |
 | RF-02 | Ingresar la red por teclado: primero las sedes y luego los tramos, con opción de terminar en cualquier momento. | Alta |
 | RF-03 | Validar los datos: costo numérico y positivo, origen distinto de destino, sedes no vacías. Las filas inválidas se informan con su número de línea y se omiten, sin cerrar el programa. | Alta |
 | RF-04 | Mostrar la red cargada en una tabla: número de sedes, número de tramos y lista de tramos con su costo. | Media |
@@ -143,6 +143,7 @@ Callao,Ate,15
 - La primera fila es el encabezado.
 - `costo` es un número positivo (puede tener decimales con punto).
 - Un tramo repetido entre las mismas sedes se conserva; los algoritmos se quedan con el más barato de forma natural.
+- Una fila con un solo nombre (por ejemplo `Pachacamac`) declara una sede aislada, sin tramos. El plan la reporta como un grupo de una sola sede.
 
 ## 8. Menú principal propuesto
 

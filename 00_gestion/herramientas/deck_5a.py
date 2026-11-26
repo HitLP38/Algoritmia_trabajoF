@@ -60,22 +60,28 @@ CODIGO = {
 }
 
 # ---------------------------------------------------------------------------
-# Datos del benchmark (preliminares: entorno de desarrollo). Se reemplazan
-# con los CSV de la PC de Raul copiándolos a 00_gestion/herramientas/bench5a/.
+# Datos del benchmark: los CSV versionados en 5a_FibraNet/06_codigo/benchmark/
+# (corrida en la PC del grupo). Para probar otra corrida sin tocar esos CSV,
+# se copian a 00_gestion/herramientas/bench5a/ y se marcan como preliminares.
 # ---------------------------------------------------------------------------
 def cargar_bench():
     import csv
-    base = os.path.join(AQUI, "bench5a")
-    if not os.path.isdir(base):
-        base = "/tmp/claude-0/bench5a/benchmark"
+    prueba = os.path.join(AQUI, "bench5a")
+    base = prueba if os.path.isdir(prueba) else os.path.join(COD, "benchmark")
     mst = [[r["densidad"], int(r["V"]), int(r["E"]), float(r["kruskal_ms"]), float(r["prim_ms"])]
            for r in csv.DictReader(open(os.path.join(base, "resultados_mst.csv")))]
     uf = [[int(r["n"]), int(r["operaciones"]), float(r["optimizado_ns_por_op"]),
            float(r["ingenuo_ns_por_op"]) if r["ingenuo_ns_por_op"] else None]
           for r in csv.DictReader(open(os.path.join(base, "resultados_unionfind.csv")))]
-    return dict(mst=mst, uf=uf, preliminar=not os.path.isdir(os.path.join(AQUI, "bench5a")))
+    return dict(mst=mst, uf=uf, preliminar=(base == prueba))
 
 BENCH = cargar_bench()
+# rango de ns/op del Union-Find optimizado desde n = 5 000 (antes el JIT aún no se estabiliza)
+_UF_OPT = [f[2] for f in BENCH["uf"] if f[0] >= 5000]
+UF_MIN, UF_MAX = round(min(_UF_OPT)), round(max(_UF_OPT))
+_UF_20K = next(f for f in BENCH["uf"] if f[0] == 20000)
+UF_VECES = int(round(_UF_20K[3] / _UF_20K[2], -2))
+UF_VECES_TXT = f"{UF_VECES:,}".replace(",", " ")
 
 def img(k, alt):
     return f'<div class="imgbox"><img data-img="{k}" alt="{alt}"></div>'
@@ -165,8 +171,11 @@ lam(1, "El problema", "El problema de FibraNet", "1:00", f'''
     "Si tendiéramos todos los tramos gastaríamos 137. Pero para que todas las sedes se comuniquen basta un árbol: 11 tramos, que es n menos 1. "
     "El mejor árbol cuesta 61, un ahorro de 55,5 por ciento. Ese árbol se llama árbol de expansión mínima, y es lo que calcula nuestro programa.",
     "Mapa esquemático (no realista) de Lima con 12 sedes como pines: Sede Central, San Isidro, Miraflores, Barranco, Chorrillos, Surco, "
-    "La Molina, Ate, San Juan de Lurigancho, Comas, Los Olivos y Callao. Entre ellas 18 líneas grises punteadas que representan tramos "
-    "posibles de fibra; 11 de esas líneas resaltadas en granate grueso formando un árbol que une todas las sedes sin ciclos. "
+    "La Molina, Ate, San Juan de Lurigancho, Comas, Los Olivos y Callao. Dibuja SOLO estas 18 líneas, sin agregar otras. "
+    "En granate grueso (las 11 del plan): Miraflores–Barranco, San Isidro–Miraflores, Barranco–Chorrillos, Sede Central–San Isidro, "
+    "Los Olivos–Comas, Miraflores–Surco, Ate–La Molina, San Juan de Lurigancho–Ate, Surco–La Molina, Callao–Los Olivos, Comas–San Juan de Lurigancho. "
+    "En gris punteado (las 7 descartadas): Sede Central–Miraflores, Sede Central–Callao, San Isidro–Surco, Surco–Chorrillos, "
+    "Sede Central–San Juan de Lurigancho, Ate–Sede Central, Callao–San Isidro. "
     "Los nombres de las sedes pueden aparecer en letras pequeñas y legibles. " + ESTILO_IMG)
 
 # 4 ─ Requerimientos
@@ -268,11 +277,11 @@ lam(2, "Teoría del MST", "Especificación y complejidad", "1:10", '''
       <tr><td><b>Salida</b></td><td>T ⊆ E de costo mínimo</td></tr>
       <tr><td><b>Pre</b></td><td>|V| ≥ 1, pesos ≥ 0</td></tr>
       <tr><td><b>Post</b></td><td>T acíclico; si G es conexo, |T| = |V| − 1; si no, un árbol por componente</td></tr>
-      <tr><td><b>Invariante</b></td><td>T siempre está contenido en algún MST</td></tr></table></div>
+      <tr><td><b>Invariante</b></td><td>T siempre está contenido en algún bosque de expansión mínima (un árbol si G es conexo)</td></tr></table></div>
     <div class="panel acc"><span class="tag">Costo (V sedes, E tramos)</span><table class="compact grande">
       <tr><th>Operación</th><th>Peor O</th><th>Mejor Ω</th><th>Típico Θ</th></tr>
-      <tr><td>Kruskal</td><td class="m">E log E</td><td class="m">E log E</td><td class="m">E log V</td></tr>
-      <tr><td>Prim (heap)</td><td class="m">E log V</td><td class="m">E log V</td><td class="m">E log V</td></tr>
+      <tr><td>Kruskal</td><td class="m">V + E log E</td><td class="m">V + E</td><td class="m">V + E log V</td></tr>
+      <tr><td>Prim (heap)</td><td class="m">V + E log V</td><td class="m">V + E</td><td class="m">V + E log V</td></tr>
       <tr><td>find / union</td><td class="m">α(n)*</td><td class="m">1</td><td class="m">α(n)*</td></tr>
       <tr><td>UF ingenuo</td><td class="m">n</td><td class="m">1</td><td class="m">n</td></tr>
       <tr><td>Memoria</td><td colspan="3" class="m">O(V + E)</td></tr></table>
@@ -280,8 +289,9 @@ lam(2, "Teoría del MST", "Especificación y complejidad", "1:10", '''
   </div>''',
     "Formalmente, la entrada es un grafo con pesos no negativos y la salida un subconjunto de aristas de costo mínimo, sin ciclos. "
     "Si el grafo es conexo da V menos 1 aristas; si no, da un árbol por componente. "
-    "El invariante que garantiza la correctitud es que el conjunto elegido siempre está contenido en algún árbol mínimo. "
-    "En costo: Kruskal es E log E por el ordenamiento, Prim con montículo es E log V, y como E es a lo más V al cuadrado, log E es a lo más 2 log V, así que son del mismo orden. "
+    "El invariante que garantiza la correctitud es que el conjunto elegido siempre está contenido en algún bosque de expansión mínima; si la red es conexa, ese bosque es un árbol. "
+    "En costo: los dos pagan V por recorrer las sedes; Kruskal suma E log E por el ordenamiento y Prim con montículo E log V. "
+    "Si no hay tramos repetidos entre el mismo par de sedes, E es a lo más V al cuadrado y log E es a lo más 2 log V, así que son del mismo orden. "
     "Union-Find optimizado cuesta alfa de n amortizado, que en la práctica es una constante menor o igual a 4.",
     "Ilustración de una pizarra académica con fórmulas de complejidad O(E log V) y α(n), y una gráfica pequeña de curvas que crecen "
     "a distinto ritmo (lineal, n log n, casi constante). Estilo limpio de libro técnico. " + ESTILO_IMG)
@@ -439,7 +449,7 @@ lam(5, "Motor 3 · Prim", "Prim en Java", "1:20", '''
     <div style="display:flex;flex-direction:column;gap:14px">
       <div class="panel acc"><span class="tag">PriorityQueue = montículo</span><p><span class="m">poll()</span> y <span class="m">add()</span> cuestan O(log E). Cada tramo entra a lo más dos veces.</p></div>
       <div class="panel"><span class="tag">boolean[] enArbol</span><p>Marca en O(1) qué sedes ya están dentro. Memoria O(V).</p></div>
-      <div class="panel gold"><span class="tag">Red no conexa</span><p>Si la cola se vacía y faltan sedes, se inicia otro árbol: mismo bosque que Kruskal.</p></div>
+      <div class="panel gold"><span class="tag">Red no conexa</span><p>Si la cola se vacía y faltan sedes, se inicia otro árbol: un bosque del mismo costo que el de Kruskal (los tramos pueden variar si hay empates).</p></div>
     </div>
   </div>''',
     "Este es el núcleo de Prim.java. Mientras la cola no esté vacía, sacamos el mínimo con poll. "
@@ -513,15 +523,16 @@ lam(6, "Resultados", "Benchmark: Kruskal vs Prim", "1:20", f'''
     <svg id="grafMST" style="width:100%;height:100%;min-height:0"></svg>
     <div style="display:flex;flex-direction:column;gap:12px">
       {tabla_mst()}
-      <div class="panel acc"><span class="tag">Contraste con la teoría</span><p>Ambos crecen como <b>E log V</b>: el cociente tiempo / (E log V) se mantiene casi constante. Prim paga más por las operaciones del montículo en redes densas.</p></div>
+      <div class="panel acc"><span class="tag">Contraste con la teoría</span><p>Kruskal sigue a <b>E log V</b>: su cociente no crece (en densas, de 29 a 23 ns). En Prim denso el cociente sube de 32 a 75 ns: el montículo con cientos de miles de tramos ya no cabe en la caché.</p></div>
       <p style="font-size:16px;color:var(--muted)">Semilla 2026 · 2 calentamientos · promedio de 5 corridas · redes dispersas (E = 4V) y densas (E ≈ V log V).</p>
       {AVISO}
     </div>
   </div>''',
     "Para el benchmark generamos redes al azar con semilla fija 2026, desde mil hasta cincuenta mil sedes, dispersas y densas. "
     "Cada medición tiene dos corridas de calentamiento y es el promedio de cinco corridas. "
-    "Las dos curvas crecen casi en línea con E log V, como predice la teoría: dividimos el tiempo entre E log V y el cociente se mantiene estable. "
-    "En redes densas Kruskal sale más rápido, porque ordenar un arreglo es muy eficiente en Java y Prim hace muchas operaciones en el montículo.",
+    "Para contrastar con la teoría dividimos el tiempo entre E log V. En Kruskal ese cociente no crece, así que sigue la cota. "
+    "En Prim con redes densas el cociente sube de unos 32 a unos 75 nanosegundos: el orden sigue siendo E log V, pero el montículo con cientos de miles de tramos ya no cabe en la memoria caché y cada operación cuesta más. "
+    "Por eso en redes densas Kruskal sale más rápido: con cincuenta mil sedes, 284 milisegundos contra 919 de Prim.",
     "Imagen de apoyo opcional: un cronómetro estilizado junto a dos curvas ascendentes, una granate y otra azul, que compiten en una carrera "
     "sobre una cuadrícula técnica. " + ESTILO_IMG)
 
@@ -539,8 +550,9 @@ lam(6, "Resultados", "Benchmark: Union-Find", "1:10", f'''
   </div>''',
     "Aquí comparamos Union-Find sin optimizar contra el optimizado, en escala logarítmica en los dos ejes. "
     "La versión ingenua crece en línea recta: cada vez que n se duplica, el costo por operación también, porque los árboles se vuelven listas largas. "
-    "La versión con compresión y unión por rango se mantiene casi plana, entre 3 y 5 nanosegundos por operación, incluso con un millón de elementos. "
-    "Con veinte mil elementos ya es unas tres mil veces más rápida. Eso confirma en la práctica que alfa de n se comporta como una constante.",
+    f"La versión con compresión y unión por rango se mantiene casi plana, entre {UF_MIN} y {UF_MAX} nanosegundos por operación desde cinco mil hasta un millón de elementos. "
+    f"Con veinte mil elementos ya es unas {UF_VECES_TXT} veces más rápida. "
+    "Eso confirma en la práctica que alfa de n se comporta como una constante.",
     "Imagen de apoyo opcional: comparación visual de dos árboles, uno alto y delgado como una escalera (ingenuo) y otro bajo y ancho como un "
     "arbusto (optimizado), con un velocímetro a cada lado. " + ESTILO_IMG)
 
@@ -550,12 +562,12 @@ lam(6, "Resultados", "Conclusiones", "1:00", '''
   <h2>Conclusiones y trabajo futuro</h2>
   <div class="cols c3 concl">
     <div class="panel acc"><span class="tag">1 · Resultado</span><b class="kpi">61 <small>vs 137</small></b><p>FibraNet une 12 sedes con 11 tramos: <b>55,5 % de ahorro</b>.</p></div>
-    <div class="panel acc"><span class="tag">2 · Teoría comprobada</span><b class="kpi">E log V</b><p>Kruskal y Prim dan el mismo costo. Union-Find optimizado es casi <b>O(1)</b>.</p></div>
+    <div class="panel acc"><span class="tag">2 · Teoría comprobada</span><b class="kpi">E log V</b><p>Kruskal y Prim dan el mismo costo. Kruskal sigue la cota; Prim denso paga la caché. Union-Find optimizado es casi <b>O(1)</b>.</p></div>
     <div class="panel acc"><span class="tag">3 · Cuándo usar cuál</span><b class="kpi">K <small>o</small> P</b><p><b>Kruskal</b> si los tramos llegan como lista; <b>Prim</b> si la red está en adyacencias y es muy densa.</p></div>
   </div>
   <div class="panel gold"><span class="tag">Trabajo futuro</span><p>Prim con montículo indexado (decrease-key) · redundancia: segundo mejor árbol para respaldo · costos que cambian en el tiempo (ver tema 5.b, Link-Cut Trees).</p></div>''',
     "Cerramos con tres conclusiones. Primera: para FibraNet el plan cuesta 61 en vez de 137, un ahorro de más de la mitad. "
-    "Segunda: los experimentos confirman la teoría: Kruskal y Prim encuentran el mismo costo, crecen como E log V, y Union-Find optimizado es prácticamente constante. "
+    "Segunda: Kruskal y Prim encuentran el mismo costo; Kruskal sigue la cota E log V y Prim, en redes densas grandes, paga además los fallos de caché del montículo. Union-Find optimizado es prácticamente constante. "
     "Tercera: Kruskal conviene cuando los tramos llegan como una lista, como en nuestro CSV; Prim conviene con redes muy densas ya guardadas como adyacencias. "
     "Como trabajo futuro: Prim con montículo indexado, un árbol de respaldo y redes que cambian en el tiempo, que es justo nuestro tema 5.b.",
     "Ilustración de cierre: una red de fibra granate completa sobre un mapa esquemático de Lima, con tres medallas o insignias "
@@ -588,7 +600,7 @@ lam(6, "Cierre", "Preguntas y gracias", "0:30", f'''
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:10px;text-align:left;width:100%">
       <div class="panel"><span class="tag">Recordar 1</span><p>Un árbol con n sedes tiene <b>n − 1</b> tramos.</p></div>
       <div class="panel"><span class="tag">Recordar 2</span><p><span class="m">union</span> devuelve false → el tramo cerraría un <b>ciclo</b>.</p></div>
-      <div class="panel"><span class="tag">Recordar 3</span><p>Kruskal y Prim: mismo costo, <b>O(E log V)</b>.</p></div>
+      <div class="panel"><span class="tag">Recordar 3</span><p>Kruskal y Prim: mismo costo, <b>O(V + E log V)</b>.</p></div>
     </div>
   </div>
   <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:40px;align-items:end">
@@ -773,7 +785,9 @@ def guiones():
 
 
 if __name__ == "__main__":
-    escribir(os.path.join(TEMA, "03_ppt", "FibraNet_Slides.html"), construir_html())
+    # python deck_5a.py FibraNet_Slides_v2.html  -> guarda una versión nueva sin pisar la anterior
+    salida = sys.argv[1] if len(sys.argv) > 1 else "FibraNet_Slides.html"
+    escribir(os.path.join(TEMA, "03_ppt", salida), construir_html())
     os.makedirs(os.path.join(TEMA, "03_ppt", "img"), exist_ok=True)
     prompts()
     guiones()

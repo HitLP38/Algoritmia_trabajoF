@@ -1,5 +1,6 @@
 // Genera el informe UNI/IEEE de RedLuz (Tema 5.b). Uso: node informe_5b.js salida.docx
 const fs = require('fs');
+const path = require('path');
 const {
   Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell,
   AlignmentType, WidthType, BorderStyle, ShadingType, SectionType, LevelFormat,
@@ -68,7 +69,7 @@ const tituloTabla = (num, t) => [
     children: runs(t, { size: 16, smallCaps: true }) })
 ];
 function figura(archivo, num, pie, anchoPx = 300) {
-  const buf = fs.readFileSync(FIG + archivo);
+  const buf = fs.readFileSync(path.join(FIG, archivo));
   const w = buf.readUInt32BE(16), h = buf.readUInt32BE(20);
   return [
     new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 100, after: 40 }, keepNext: true,

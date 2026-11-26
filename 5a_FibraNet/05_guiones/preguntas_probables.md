@@ -23,10 +23,10 @@ Cualquiera de los 6 debe poder responderlas. Entre paréntesis, quién responde 
    Kruskal termina con más de un grupo (`numeroGrupos() > 1`). Prim, al vaciarse la cola, empieza otro árbol desde una sede no visitada. Los dos entregan un bosque, uno por componente.
 
 7. **¿Kruskal y Prim siempre dan los mismos tramos?** (Gianpierre)
-   Dan el mismo **costo**. Los tramos pueden variar si hay empates de costo (en nuestra red hay varios tramos de costo 3, 4, 5 y 6).
+   Dan el mismo **costo**. Los tramos pueden variar si hay empates de costo (en nuestra red hay varios tramos de costo 3, 4, 5 y 6). Si la red no es conexa, los dos dan un bosque del mismo costo.
 
 8. **¿Por qué E log E es lo mismo que E log V?** (Santiago)
-   Porque E ≤ V², entonces log E ≤ 2 log V.
+   Si no hay dos tramos entre el mismo par de sedes, E ≤ V², entonces log E ≤ 2 log V. Nuestro lector sí acepta tramos repetidos (dos ofertas entre las mismas sedes); en ese caso la cota correcta es O(V + E log E), porque E ya no está acotado por V². En las redes del proyecto no hay pares repetidos.
 
 ## Sobre el diseño y los resultados
 
@@ -37,10 +37,10 @@ Cualquiera de los 6 debe poder responderlas. Entre paréntesis, quién responde 
     Semilla fija 2026, 2 corridas de calentamiento para el JIT, promedio de 5 corridas con `System.nanoTime()`, y redes de 1 000 a 50 000 sedes, dispersas y densas.
 
 11. **¿Por qué Prim sale más lento en redes densas?** (Cesar / Raul)
-    Hace muchas inserciones y extracciones en el montículo (`PriorityQueue`), mientras que Kruskal ordena un arreglo una sola vez, operación muy optimizada en Java.
+    Hace muchas inserciones y extracciones en el montículo (`PriorityQueue`), mientras que Kruskal ordena un arreglo una sola vez, operación muy optimizada en Java. Con 50 000 sedes densas: Kruskal 284 ms y Prim 919 ms. El cociente tiempo / (E log V) de Prim sube de 32 a 75 ns porque el montículo grande ya no cabe en la caché.
 
 12. **¿Cómo prueban que el programa es correcto?** (Christopher)
-    31 pruebas automáticas: ejemplo resuelto a mano (costo 17), Prim desde dos sedes distintas, red no conexa, CSV con errores, y Kruskal = Prim en 200 redes aleatorias.
+    47 verificaciones automáticas: ejemplo resuelto a mano (costo 17), Prim desde dos sedes distintas, red no conexa, CSV con errores, y Kruskal = Prim en 200 redes aleatorias.
 
 13. **¿Qué pasa si el CSV tiene una línea mal escrita?** (Christopher)
     Se descarta esa línea, se muestra el motivo y el programa sigue con las demás (RNF de robustez).

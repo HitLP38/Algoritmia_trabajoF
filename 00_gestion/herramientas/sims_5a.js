@@ -66,6 +66,7 @@ const copiaUF = uf => ({ padre: [...uf.padre], rango: [...uf.rango] });
   });
   const svg = box.querySelector("svg"), tab = box.querySelector("table.regs"), nota = box.querySelector(".note"), op = document.querySelector(".opact");
   montarSim(box, pasos, (p) => {
+    const antes = pasos[pasos.indexOf(p) - 1]?.uf;       // celdas cuyo padre cambió respecto del paso anterior
     // dibujo del bosque: raíces en fila, hijos debajo
     const hijos = L.map(() => []); const raices = [];
     p.uf.padre.forEach((q, i) => q === i ? raices.push(i) : hijos[q].push(i));
@@ -81,7 +82,7 @@ const copiaUF = uf => ({ padre: [...uf.padre], rango: [...uf.rango] });
     });
     svg.innerHTML = `<defs><marker id="fl" viewBox="0 0 10 10" refX="40" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#566476"/></marker></defs>` + g;
     tab.innerHTML = `<tr><td>i</td>${L.map(c => `<td>${c}</td>`).join("")}</tr>` +
-      `<tr><td>padre</td>${p.uf.padre.map((q, i) => `<td class="${p.resalta.includes(i) ? "chg" : ""}">${L[q]}</td>`).join("")}</tr>` +
+      `<tr><td>padre</td>${p.uf.padre.map((q, i) => `<td class="${antes && antes.padre[i] !== q ? "chg" : ""}">${L[q]}</td>`).join("")}</tr>` +
       `<tr><td>rango</td>${p.uf.rango.map(r => `<td>${r}</td>`).join("")}</tr>`;
     nota.textContent = p.nota; op.textContent = p.op;
   });

@@ -11,7 +11,12 @@ import fibranet.motor.Prim;
 import fibranet.motor.ResultadoMST;
 import fibranet.motor.UnionFind;
 
+import fibranet.io.EscritorCsv;
+
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +50,7 @@ public final class Pruebas {
         planEsArbolSinCiclos();
         haversineDistanciasConocidas();
         redDorsalNacional();
+        archivosDeIdaYVuelta();
 
         System.out.println();
         System.out.printf("Verificaciones: %d pasaron, %d fallaron.%n", pasaron, fallas.size());
@@ -166,6 +172,7 @@ public final class Pruebas {
         verificar(LectorCsv.agregarTramo("Lima,Ate,-3", sep, g) != null, "costo negativo se rechaza");
         verificar(LectorCsv.agregarTramo("Lima,Ate,abc", sep, g) != null, "costo no numérico se rechaza");
         verificar(LectorCsv.agregarTramo("Lima,Ate", sep, g) != null, "fila incompleta se rechaza");
+        verificar(LectorCsv.agregarTramo("Lima,Ate,4,,", sep, g) != null, "fila con columnas vacías de más se rechaza");
         verificar(g.numeroTramos() == 2, "solo quedan los 2 tramos válidos");
     }
 
@@ -229,6 +236,8 @@ public final class Pruebas {
         double ida = Geo.haversineKm(-3.7491, -73.2538, -18.0146, -70.2536);
         double vuelta = Geo.haversineKm(-18.0146, -70.2536, -3.7491, -73.2538);
         verificar(Math.abs(ida - vuelta) < 1e-9, "la distancia es simétrica");
+        double opuestos = Geo.haversineKm(0, 0, 0, 180);
+        verificar(Double.isFinite(opuestos) && opuestos > 20000, "puntos opuestos dan una distancia finita (" + opuestos + ")");
     }
 
     private static void redDorsalNacional() {
@@ -246,6 +255,41 @@ public final class Pruebas {
             verificar(k.costoTotal < g.costoTotalDeTodosLosTramos() / 2, "el plan usa menos de la mitad de los km candidatos");
         } catch (IOException e) {
             verificar(false, "no se pudo leer datos/capitales_peru.csv (ejecute desde 06_codigo)");
+        }
+    }
+
+    private static void archivosDeIdaYVuelta() {
+        titulo("Exportar y volver a leer; coordenadas no válidas");
+        try {
+            Path carpeta = Files.createTempDirectory("fibranet");
+            Grafo g = new Grafo();
+            g.agregarTramo("A", "B", 0.001);               // costo pequeño: no debe volverse 0 al exportar
+            g.agregarTramo("B", "C", 1.234);
+            ResultadoMST plan = Kruskal.calcular(g, false);
+            Path csv = carpeta.resolve("plan.csv");
+            EscritorCsv.escribirPlan(csv, g, plan);
+            List<String> errores = new ArrayList<>();
+            Grafo leido = new Grafo();
+            LectorCsv.leer(csv, leido, errores);
+            verificar(errores.isEmpty() && leido.numeroTramos() == 2, "el plan exportado se vuelve a leer completo");
+
+            Path conAislada = carpeta.resolve("aislada.csv");
+            Files.write(conAislada, List.of("origen,destino,costo", "A,B,3", "X"), StandardCharsets.UTF_8);
+            Grafo g2 = new Grafo();
+            LectorCsv.leer(conAislada, g2, errores);
+            verificar(g2.numeroSedes() == 3 && Kruskal.calcular(g2, false).grupos == 2,
+                    "una fila con un solo nombre declara una sede aislada (2 grupos)");
+            verificar(Math.abs(Kruskal.calcular(leido, false).costoTotal - plan.costoTotal) < 1e-12,
+                    "el costo no se redondea al exportar (" + plan.costoTotal + ")");
+
+            Path coords = carpeta.resolve("coords.csv");
+            Files.write(coords, List.of("departamento,capital,latitud,longitud", "D,A,NaN,0", "D,B,0,1", "D,C,0,2"),
+                    StandardCharsets.UTF_8);
+            errores.clear();
+            Grafo red = LectorCoordenadas.leer(coords, 1, errores);
+            verificar(errores.size() == 1 && red.numeroSedes() == 2, "una latitud NaN se descarta con su motivo");
+        } catch (IOException e) {
+            verificar(false, "no se pudo usar la carpeta temporal: " + e.getMessage());
         }
     }
 }

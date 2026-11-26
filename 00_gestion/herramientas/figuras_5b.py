@@ -5,8 +5,9 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch
 
-B = sys.argv[1] if len(sys.argv) > 1 else '/tmp/claude-0/b5b/benchmark/'
-O = sys.argv[2] if len(sys.argv) > 2 else '/tmp/claude-0/inf5b/'
+RAIZ = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '5b_RedLuz')
+B = sys.argv[1] if len(sys.argv) > 1 else os.path.join(RAIZ, '06_codigo', 'benchmark')
+O = sys.argv[2] if len(sys.argv) > 2 else os.path.join(RAIZ, '02_informe', 'figuras')
 os.makedirs(O, exist_ok=True)
 plt.rcParams.update({'font.family': 'serif', 'font.size': 7})
 r = list(csv.DictReader(open(os.path.join(B, 'resultados_lct.csv'))))

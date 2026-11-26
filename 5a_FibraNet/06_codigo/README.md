@@ -42,8 +42,8 @@ El paso 3 debe terminar con `31 pasaron, 0 fallaron`. El paso 5 tarda menos de u
 | Operación | Peor caso | Mejor caso | Memoria |
 |---|---|---|---|
 | `UnionFind.find` / `union` | O(α(n)) amortizado | Ω(1) | O(n) |
-| `Kruskal.calcular` | O(E log E) = O(E log V) | Ω(E log E) por el ordenamiento | O(V + E) |
-| `Prim.calcular` (montículo binario) | O(E log V) | Ω(E) | O(V + E) |
+| `Kruskal.calcular` | O(V + E log E) = O(V + E log V) | Ω(E) si los tramos ya vienen ordenados (TimSort) | O(V + E) |
+| `Prim.calcular` (montículo binario) | O(V + E log V) | Ω(E) | O(V + E) |
 
 ## Caso real: Red Dorsal Nacional de Fibra Óptica
 

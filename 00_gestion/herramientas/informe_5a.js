@@ -1,5 +1,6 @@
 // Genera el informe UNI/IEEE de FibraNet (Tema 5.a)
 const fs = require('fs');
+const path = require('path');
 const {
   Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell,
   AlignmentType, WidthType, BorderStyle, ShadingType, SectionType, LevelFormat,
@@ -8,7 +9,7 @@ const {
 
 const FONT = 'Times New Roman';
 const COL = 4693;            // ancho de columna en DXA (A4, márgenes 0.75", separación 0.25")
-const FIG = '/tmp/claude-0/inf5a/';
+const FIG = process.env.FIG || path.join(__dirname, '..', '..', '5a_FibraNet', '02_informe', 'figuras');
 
 // --- mini marcado: **negrita**, *cursiva*, [[resaltado amarillo]], `código` ---
 function runs(texto, base = {}) {
@@ -68,7 +69,7 @@ const tituloTabla = (num, t) => [
     children: runs(t, { size: 16, smallCaps: true }) })
 ];
 function figura(archivo, num, pie, anchoPx = 300) {
-  const buf = fs.readFileSync(FIG + archivo);
+  const buf = fs.readFileSync(path.join(FIG, archivo));
   const w = buf.readUInt32BE(16), h = buf.readUInt32BE(20);
   return [
     new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 100, after: 40 }, keepNext: true,
@@ -155,17 +156,19 @@ const cuerpo = [
     '  retornar T'
   ]),
   H2('D. Algoritmo de Prim'),
-  P('Prim hace crecer un árbol desde una sede inicial *s*. Una cola de prioridad (montículo binario) guarda los tramos que salen del árbol; en cada paso se extrae el más barato que llega a una sede nueva. Se usó la versión perezosa: los tramos obsoletos se descartan al salir de la cola. Si la cola se vacía antes de visitar todas las sedes, se inicia un nuevo árbol desde una sede no visitada, lo que produce el mismo bosque que Kruskal.'),
+  P('Prim hace crecer un árbol desde una sede inicial *s*. Una cola de prioridad (montículo binario) guarda los tramos que salen del árbol; en cada paso se extrae el más barato que llega a una sede nueva. Se usó la versión perezosa: los tramos obsoletos se descartan al salir de la cola. Si la cola se vacía antes de visitar todas las sedes, se inicia un nuevo árbol desde una sede no visitada, lo que produce un bosque del mismo costo que el de Kruskal.'),
   ...CODE([
     'PRIM(G, s):',
     '  T ← ∅ ; enArbol[·] ← falso ; Q ← montículo vacío',
-    '  VISITAR(s)            // marca s y encola sus aristas',
-    '  mientras Q ≠ ∅:',
-    '    (u,v) ← Q.extraerMin()                O(log m)',
-    '    si enArbol[u] y enArbol[v]: continuar',
-    '    x ← extremo fuera del árbol',
-    '    T ← T ∪ {(u,v)} ; VISITAR(x)',
-    '  retornar T'
+    '  para cada r en (s, 0, 1, …, n−1):     // s primero; luego cada sede aún fuera',
+    '    si enArbol[r]: continuar',
+    '    VISITAR(r)          // marca r y encola sus aristas',
+    '    mientras Q ≠ ∅:',
+    '      (u,v) ← Q.extraerMin()              O(log m)',
+    '      si enArbol[u] y enArbol[v]: continuar',
+    '      x ← extremo fuera del árbol',
+    '      T ← T ∪ {(u,v)} ; VISITAR(x)',
+    '  retornar T            // un árbol por componente'
   ]),
   H2('E. Especificación formal (notación AS&ST)'),
   P('La Tabla I especifica cada operación con sus tipos de entrada y salida, su precondición y su poscondición. Los tipos son: *ℕₙ = {0, …, n − 1}*, *𝔹 = {verdadero, falso}* y *Arista = ℕₙ × ℕₙ × ℝ⁺*.'),

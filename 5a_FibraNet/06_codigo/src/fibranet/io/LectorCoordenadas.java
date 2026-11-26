@@ -71,7 +71,8 @@ public final class LectorCoordenadas {
                 double lon = Double.parseDouble(c[3]);
                 if (c[1].isEmpty()) {
                     errores.add("línea " + (i + 1) + ": capital vacía");
-                } else if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+                } else if (!Double.isFinite(lat) || !Double.isFinite(lon)
+                        || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
                     errores.add("línea " + (i + 1) + ": coordenadas fuera de rango");
                 } else if (!vistos.add(c[1])) {
                     errores.add("línea " + (i + 1) + ": sede repetida '" + c[1] + "'");

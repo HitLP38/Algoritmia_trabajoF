@@ -101,6 +101,9 @@ public final class Benchmark {
                             densidad, v, e, msKruskal, msPrim, razonK, razonP, memoria);
                 }
             }
+            if (csv.checkError()) {                        // PrintWriter no lanza excepciones: se revisa aquí
+                throw new IOException("falló la escritura de " + ruta);
+            }
         }
         System.out.println("\nExperimento 1: Kruskal vs Prim (tiempo promedio)");
         tabla.imprimir();
@@ -159,6 +162,9 @@ public final class Benchmark {
             }
             for (int n : TAMANOS_UF_SOLO_OPTIMIZADO) {
                 agregarFilaUf(tabla, csv, n, false);       // el ingenuo tardaría minutos
+            }
+            if (csv.checkError()) {
+                throw new IOException("falló la escritura de " + ruta);
             }
         }
         System.out.println("\nExperimento 2: Union-Find optimizado vs ingenuo (peor caso del ingenuo)");

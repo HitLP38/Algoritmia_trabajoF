@@ -28,6 +28,6 @@ public final class Geo {
         double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
                  + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
                  * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-        return 2 * RADIO_TIERRA_KM * Math.asin(Math.sqrt(a));
+        return 2 * RADIO_TIERRA_KM * Math.asin(Math.min(1.0, Math.sqrt(a)));   // min: evita NaN por redondeo en puntos opuestos
     }
 }

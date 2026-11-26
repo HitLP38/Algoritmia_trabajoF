@@ -20,7 +20,8 @@ import java.util.Locale;
  *   ordenar los E tramos ............ O(E log E)
  *   E operaciones de Union-Find ..... O(E α(V))
  *   Total ........................... O(E log E) = O(E log V)
- * Mejor caso Ω(E log E) por el ordenamiento; Θ(E log E) en general.
+ * Mejor caso Ω(E) si los tramos ya vienen ordenados (TimSort los recorre una vez);
+ * O(E log E) en general.
  */
 public final class Kruskal {
 

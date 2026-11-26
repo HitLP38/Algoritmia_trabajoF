@@ -10,10 +10,16 @@ const KW = "public|private|protected|static|final|class|new|return|if|else|for|w
 function hlJava(t) {
   const i = t.indexOf("//");
   const c = i < 0 ? t : t.slice(0, i), cm = i < 0 ? "" : t.slice(i);
-  let h = esc(c)
-    .replace(/"[^"]*"/g, m => `<span class="rg">${m}</span>`)
-    .replace(new RegExp("\\b(" + KW + ")\\b", "g"), '<span class="op">$1</span>')
-    .replace(/\b([A-Z][A-Za-z]+)\b/g, '<span class="dv">$1</span>');
+  // se recorre el código fuente por tokens y se escapa cada uno: así nunca se resalta dentro del HTML generado
+  const tok = new RegExp('("[^"]*")|\\b(' + KW + ')\\b|\\b([A-Z][A-Za-z]+)\\b', "g");
+  let h = "", ult = 0, m;
+  while ((m = tok.exec(c)) !== null) {
+    h += esc(c.slice(ult, m.index));
+    const clase = m[1] ? "rg" : (m[2] ? "op" : "dv");
+    h += `<span class="${clase}">${esc(m[0])}</span>`;
+    ult = tok.lastIndex;
+  }
+  h += esc(c.slice(ult));
   return h + (cm ? `<span class="cm">${esc(cm)}</span>` : "");
 }
 document.querySelectorAll("pre[data-java]").forEach(p => {
@@ -86,10 +92,18 @@ function go(i) {
   try { history.replaceState(null, "", "#" + (cur + 1)); } catch (e) { }
 }
 const ov = document.getElementById("overview");
-ov.innerHTML = slides.map((s, i) => { const m = META.slides[i] || {}; return `<div class="th" data-i="${i}"><b>${String(i + 1).padStart(2, "0")} · ${m.block || ""}</b><span>${m.title || ""}</span><i>${team[(m.owner || 1) - 1]}</i></div>`; }).join("");
-ov.addEventListener("click", e => { const t = e.target.closest(".th"); if (t) { go(+t.dataset.i); ov.hidden = true; } });
+ov.innerHTML = slides.map((s, i) => { const m = META.slides[i] || {}; return `<button type="button" class="th" data-i="${i}"><b>${String(i + 1).padStart(2, "0")} · ${m.block || ""}</b><span>${m.title || ""}</span><i>${team[(m.owner || 1) - 1]}</i></button>`; }).join("");
+let focoAntes = null;                                       // se devuelve el foco al cerrar el índice
+const cerrarO = () => { ov.hidden = true; (focoAntes && focoAntes.isConnected && focoAntes !== document.body ? focoAntes : document.getElementById("bOv")).focus(); };
+ov.addEventListener("click", e => { const t = e.target.closest(".th"); if (t) { go(+t.dataset.i); cerrarO(); } });
 const tgN = () => { const n = document.getElementById("notes"); n.hidden = !n.hidden; };
-const tgO = () => { ov.hidden = !ov.hidden; ov.querySelectorAll(".th").forEach((t, i) => t.classList.toggle("cur", i === cur)); };
+const tgO = () => {
+  if (!ov.hidden) { cerrarO(); return; }
+  focoAntes = document.activeElement; ov.hidden = false;
+  const fichas = ov.querySelectorAll(".th");
+  fichas.forEach((t, i) => t.classList.toggle("cur", i === cur));
+  fichas[cur]?.focus();
+};
 const tgF = () => { try { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); } catch (e) { } };
 document.getElementById("bPrev").onclick = () => go(cur - 1);
 document.getElementById("bNext").onclick = () => go(cur + 1);
@@ -108,11 +122,14 @@ addEventListener("keydown", e => {
   if (!pt.hidden) { if (e.key === "Escape") pt.hidden = true; return; }
   if ((e.key === "p" || e.key === "P") && !e.ctrlKey && !e.metaKey) { tgP(); return; }
   const k = e.key;
+  const enControl = e.target.closest && e.target.closest("button, a, [role=button]");
+  if (k === " " && enControl) return;                       // Espacio activa el botón con foco, no cambia de lámina
+  if (!ov.hidden && k !== "Escape" && k !== "o" && k !== "O") return;   // en el índice, Tab/Enter navegan las fichas
   if (["ArrowRight", "PageDown", " "].includes(k)) { e.preventDefault(); go(cur + 1); }
   else if (["ArrowLeft", "PageUp"].includes(k)) { e.preventDefault(); go(cur - 1); }
   else if (k === "Home") go(0); else if (k === "End") go(N - 1);
   else if (k === "n" || k === "N") tgN(); else if (k === "o" || k === "O") tgO();
-  else if (k === "f" || k === "F") tgF(); else if (k === "Escape") ov.hidden = true;
+  else if (k === "f" || k === "F") tgF(); else if (k === "Escape" && !ov.hidden) cerrarO();
 });
 let tx = null;
 addEventListener("touchstart", e => tx = e.touches[0].clientX, { passive: true });

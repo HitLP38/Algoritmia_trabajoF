@@ -13,6 +13,7 @@ import fibranet.motor.ResultadoMST;
 import fibranet.motor.UnionFind;
 
 import java.io.IOException;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -106,7 +107,7 @@ public class Main {
         try {
             red = LectorCoordenadas.leer(Paths.get(ruta), vecinos, errores);
             ultimoPlan = null;
-        } catch (IOException e) {
+        } catch (IOException | InvalidPathException e) {
             System.out.println("No se pudo leer el archivo: " + e.getMessage());
             return;
         }
@@ -131,7 +132,7 @@ public class Main {
             red = nueva;
             ultimoPlan = null;
             System.out.printf("Se leyeron %d tramos válidos.%n", leidos);
-        } catch (IOException e) {
+        } catch (IOException | InvalidPathException e) {
             System.out.println("No se pudo leer el archivo: " + e.getMessage());
             return;
         }
@@ -150,8 +151,8 @@ public class Main {
             if (finDeEntrada) {
                 return;
             }
-            if (nombre.isEmpty() || nombre.contains(" ")) {
-                System.out.println("  El nombre no puede estar vacío ni tener espacios (use Santa_Anita).");
+            if (nombre.isEmpty() || !nombre.matches("[^\\s,;]+")) {   // sin espacios ni separadores del CSV
+                System.out.println("  El nombre no puede estar vacío ni tener espacios, comas o punto y coma (use Santa_Anita).");
                 i--;                                        // se repite la misma sede
                 continue;
             }

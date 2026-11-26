@@ -15,6 +15,7 @@ import java.util.List;
  *
  *   origen,destino,costo
  *   Lima,Callao,12
+ *   Pachacamac          (una sola columna: sede aislada, sin tramos)
  *
  * Valida cada fila (RF-03). Las filas inválidas no detienen la lectura:
  * se guardan en la lista de errores con su número de línea.
@@ -48,6 +49,11 @@ public final class LectorCsv {
                 if (linea.isBlank()) {
                     continue;                               // las líneas vacías se ignoran
                 }
+                String sola = linea.trim();
+                if (!sola.contains(",") && !sola.contains(";")) {
+                    grafo.agregarSede(sola);                // fila de una sola columna: sede sin tramos (aislada)
+                    continue;
+                }
                 String error = agregarTramo(linea, SEPARADOR_CSV, grafo);
                 if (error == null) {
                     validos++;
@@ -67,7 +73,7 @@ public final class LectorCsv {
      * @return null si se agregó, o el motivo del error
      */
     public static String agregarTramo(String linea, String separador, Grafo grafo) {
-        String[] partes = linea.trim().split(separador);
+        String[] partes = linea.trim().split(separador, -1);   // -1: no descarta campos vacíos al final
         if (partes.length != 3) {
             return "se esperaban 3 valores (origen, destino, costo) y hay " + partes.length;
         }
