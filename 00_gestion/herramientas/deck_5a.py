@@ -140,10 +140,9 @@ lam(1, "Portada", "FibraNet: red de fibra de costo mínimo", "0:40", f'''
     <div class="team teamlist"></div>
     <div style="font-size:18px;color:var(--muted)">Docente: <b style="color:var(--ink)">{DOCENTE}</b><br>Lima, martes 8 de diciembre de 2026</div>
   </div>''',
-    "Buenos días. Somos el Grupo 5 y presentamos FibraNet, el tema 5.a del proyecto final. "
-    "Modelamos la conexión de 24 capitales departamentales y el Callao, tomando como contexto la Red Dorsal Nacional. "
-    "Para resolverlo usamos tres herramientas del curso: el algoritmo de Kruskal, el algoritmo de Prim y la estructura Union-Find. "
-    "Cada integrante va a explicar una parte, y los tres bloques del motor los explicamos Javier, Gianpierre y Raul.",
+    "Buenos días. Somos el Grupo 5. Presentamos FibraNet, un modelo inspirado en la Red Dorsal Nacional de Fibra Óptica. "
+    "En el mapa vemos 24 capitales departamentales y el Callao. Queremos conectarlas con la menor longitud total dentro del grafo de candidatos. "
+    "Para resolverlo usamos Prim, Kruskal y Union-Find. Primero veremos cómo construimos los candidatos. Después mostraremos el motor y los resultados.",
     "Mapa del Perú con las 25 sedes y los 24 enlaces del plan. Usa el grafo de FibraNet como referencia. " + ESTILO_IMG,
     cls="cover", nocaj=True)
 
@@ -170,8 +169,10 @@ lam(1, "El problema", "El problema de FibraNet", "1:00", f'''
     </div>
     {mapa("L03", "Tramos candidatos y plan de FibraNet en Perú", "candidatos")}
   </div>''',
-    "Las cuatro propuestas por sede se combinan y se quitan duplicados. Los 65 candidatos suman 16 975,1 km. "
-    "El árbol de 24 tramos suma 4 081,4 km, un 76 por ciento menos en el modelo académico.",
+    "Cada sede propone enlaces a sus cuatro vecinas más cercanas. Medimos la distancia con haversine. Al juntar las propuestas, contamos cada enlace una sola vez. "
+    "Así quedan 65 tramos que suman 16 975,1 kilómetros. En el mapa, los tramos en granate forman el árbol. "
+    "Ese árbol conecta las 25 sedes con 24 tramos y suma 4 081,4 kilómetros. Es un 76 por ciento menos que sumar todos los candidatos. "
+    "Son distancias geodésicas del modelo. Para estimar el tendido real habría que estudiar las rutas de obra.",
     "Mapa del Perú con 25 sedes. Destaca los 24 tramos del árbol en granate y los demás candidatos en gris punteado. Sigue el grafo del simulador. " + ESTILO_IMG)
 
 
@@ -402,8 +403,9 @@ lam(4, "Motor 2 · Kruskal", "Simulador de Kruskal", "1:40", '''
       <div style="display:flex;flex-direction:column;gap:10px;min-height:0"><div class="stat costo"></div><div class="lista"></div><div class="note"></div></div>
     </div>
   </div>''',
-    "Kruskal ordena los 65 candidatos. Primero acepta Callao–Lima, de 8,3 km. Los colores indican los grupos de Union-Find. "
-    "Si un tramo cierra un ciclo, se descarta. Al completar 24 tramos queda un grupo y el árbol suma 4 081,4 km.",
+    "Empezamos con 25 grupos y los 65 candidatos ordenados por distancia. Pulso Paso. El enlace Callao–Lima, de 8,3 kilómetros, une dos grupos y entra al árbol. "
+    "Avanzo hasta que se rechace un enlace. Sus extremos ya están conectados. Si lo agregáramos, cerraríamos un ciclo. "
+    "Pulso Todo. El plan tiene 24 tramos, un solo grupo y 4 081,4 kilómetros. Ahora veremos cómo Prim llega al mismo costo.",
     "Simulador interactivo. Imagen opcional: tramos del árbol que se destacan en orden creciente de longitud. " + ESTILO_IMG)
 
 
@@ -463,8 +465,9 @@ lam(5, "Motor 3 · Prim", "Simulador de Prim", "1:40", '''
       <div style="display:flex;flex-direction:column;gap:10px;min-height:0"><div class="stat costo"></div><div class="lista"></div><div class="note"></div></div>
     </div>
   </div>''',
-    "Prim empieza en Lima y agrega primero el Callao. Los tramos azules esperan en la cola y las sedes en granate ya están dentro del árbol. "
-    "Se descartan los tramos con ambos extremos dentro. Al finalizar, el árbol llega a 25 sedes y suma 4 081,4 km.",
+    "Prim empieza en Lima. En la cola se ve el tramo más barato arriba. Pulso Paso. Callao entra por el enlace de 8,3 kilómetros. "
+    "Cada sede nueva añade a la cola sus conexiones hacia las sedes de afuera. Si sale un enlace con ambos extremos dentro, se descarta. "
+    "Pulso Todo. Ahora las 25 sedes están en el árbol. El total es 4 081,4 kilómetros, igual que en Kruskal.",
     "Simulador interactivo. Imagen opcional: secuencia del crecimiento del árbol desde Lima. " + ESTILO_IMG)
 
 
@@ -477,7 +480,7 @@ lam(6, "Resultados", "Arquitectura y demo por consola", "1:20", '''
       <div class="pk"><b>fibranet.Main</b><span>menú 0–10 · Scanner</span></div>
       <div class="pkrow"><div class="pk"><b>io</b><span>LectorCoordenadas · LectorCsv</span></div><div class="pk acc"><b>motor</b><span>UnionFind · Kruskal · Prim · ResultadoMST</span></div></div>
       <div class="pk"><b>modelo</b><span>Grafo (listas de adyacencia) · Arista (Comparable)</span></div>
-      <div class="pkrow"><div class="pk gold"><b>pruebas</b><span>41 verificaciones · OK/FALLA</span></div><div class="pk gold"><b>benchmark</b><span>semilla 2026 · CSV</span></div></div>
+      <div class="pkrow"><div class="pk gold"><b>pruebas</b><span>47 verificaciones · OK/FALLA</span></div><div class="pk gold"><b>benchmark</b><span>semilla 2026 · CSV</span></div></div>
       <p style="font-size:17px;color:var(--muted)">Solo librería estándar · <span class="m">javac</span> sin Maven · Java 11+ · repositorio <span class="m">HitLP38/Algoritmia_trabajoF</span></p>
     </div>
     <div class="dos"><span class="p">Opción 10 · Red Dorsal Nacional</span>
@@ -491,8 +494,10 @@ Candidatos    65 tramos     16 975,1 km
 
 <span class="p">76 % menos kilómetros en el modelo</span></div>
   </div>''',
-    "La opción 10 carga las capitales. LectorCoordenadas genera el grafo y el motor calcula ambos planes. "
-    "Kruskal y Prim obtienen la misma longitud mínima para las 25 sedes.",
+    "En la consola elijo la opción diez. LectorCoordenadas lee las latitudes y longitudes del CSV. Calcula las distancias y arma la lista de candidatos. "
+    "El motor recibe ese mismo grafo para Kruskal y Prim. A la derecha vemos el resultado de los dos: 24 enlaces y 4 081,4 kilómetros. "
+    "La versión actual pasó 47 verificaciones. Entre ellas está la comparación de los dos algoritmos en este caso. "
+    "La demo de consola entra en este tiempo. Si falla la apertura, la lámina ya contiene la salida resumida.",
     "Diagrama de Main, LectorCoordenadas y Kruskal/Prim junto a la salida resumida de la opción 10. " + ESTILO_IMG)
 
 
@@ -504,16 +509,14 @@ lam(6, "Resultados", "Benchmark: Kruskal vs Prim", "1:20", f'''
     <svg id="grafMST" style="width:100%;height:100%;min-height:0"></svg>
     <div style="display:flex;flex-direction:column;gap:12px">
       {tabla_mst()}
-      <div class="panel acc"><span class="tag">Contraste con la teoría</span><p>Kruskal sigue a <b>E log V</b>: su cociente no crece (en densas, de 29 a 23 ns). En Prim denso el cociente sube de 32 a 75 ns: el montículo con cientos de miles de tramos ya no cabe en la caché.</p></div>
+      <div class="panel acc"><span class="tag">Contraste con la teoría</span><p>En redes densas, el cociente de Prim pasa de <b>31,6 a 75,4 ns</b>. Las razones normalizadas varían con el tamaño y la densidad.</p></div>
       <p style="font-size:16px;color:var(--muted)">Semilla 2026 · 2 calentamientos · promedio de 5 corridas · redes dispersas (E = 4V) y densas (E ≈ V log V).</p>
       {AVISO}
     </div>
   </div>''',
-    "Para el benchmark generamos redes al azar con semilla fija 2026, desde mil hasta cincuenta mil sedes, dispersas y densas. "
-    "Cada medición tiene dos corridas de calentamiento y es el promedio de cinco corridas. "
-    "Para contrastar con la teoría dividimos el tiempo entre E log V. En Kruskal ese cociente no crece, así que sigue la cota. "
-    "En Prim con redes densas el cociente sube de unos 32 a unos 75 nanosegundos: el orden sigue siendo E log V, pero el montículo con cientos de miles de tramos ya no cabe en la memoria caché y cada operación cuesta más. "
-    "Por eso en redes densas Kruskal sale más rápido: con cincuenta mil sedes, 284 milisegundos contra 919 de Prim.",
+    "Este benchmark se hizo con grafos sintéticos, de mil a cincuenta mil sedes. Para cada tamaño promediamos cinco corridas, después de dos de calentamiento. "
+    "En el grafo denso de cincuenta mil sedes, Kruskal tardó 284,19 milisegundos y Prim 918,52. "
+    "Al dividir por E log V, las razones varían según el tamaño y la densidad. Esta medición compara el rendimiento en nuestra PC.",
     "Imagen de apoyo opcional: un cronómetro estilizado junto a dos curvas ascendentes, una granate y otra azul, que compiten en una carrera "
     "sobre una cuadrícula técnica. " + ESTILO_IMG)
 
@@ -543,14 +546,13 @@ lam(6, "Resultados", "Conclusiones", "1:00", '''
   <h2>Conclusiones y trabajo futuro</h2>
   <div class="cols c3 concl">
     <div class="panel acc"><span class="tag">1 · Resultado</span><b class="kpi">4&#8239;081,4 <small>km</small></b><p>24 tramos para 25 sedes. <b>76 % menos km</b> frente a los 16&#8239;975,1 km candidatos.</p></div>
-    <div class="panel acc"><span class="tag">2 · Teoría comprobada</span><b class="kpi">E log V</b><p>Kruskal y Prim dan el mismo costo. En el benchmark denso de 50 000 sedes, Kruskal tardó 284,19 ms y Prim 918,52 ms.</p></div>
-    <div class="panel acc"><span class="tag">3 · Cuándo usar cuál</span><b class="kpi">K <small>o</small> P</b><p><b>Kruskal</b> si los tramos llegan como lista; <b>Prim</b> si la red está en adyacencias y es muy densa.</p></div>
+    <div class="panel acc"><span class="tag">2 · Benchmark</span><b class="kpi">E log V</b><p>Kruskal y Prim dan el mismo costo. En el benchmark denso de 50 000 sedes, Kruskal tardó 284,19 ms y Prim 918,52 ms.</p></div>
+    <div class="panel acc"><span class="tag">3 · Cómo eligen</span><b class="kpi">K <small>o</small> P</b><p><b>Kruskal</b> ordena los candidatos. <b>Prim</b> elige desde la frontera del árbol.</p></div>
   </div>
   <div class="panel gold"><span class="tag">Trabajo futuro</span><p>Evaluar trazados de obra, costos por tramo y enlaces de respaldo.</p></div>''',
-    "En el modelo, el plan suma 4 081,4 km frente a 16 975,1 km de todos los candidatos. "
-    "En el benchmark denso de mayor tamaño, Kruskal tardó menos que Prim. Ambos algoritmos tienen cota O(E log V) en estas implementaciones. "
-    "Tercera: Kruskal conviene cuando los tramos llegan como una lista, como en nuestro CSV; Prim conviene con redes muy densas ya guardadas como adyacencias. "
-    "Para un estudio de obra quedan por evaluar trazados, costos por tramo y respaldo.",
+    "El plan conecta las 25 sedes con 24 tramos. Suma 4 081,4 kilómetros, frente a 16 975,1 de los candidatos. "
+    "Kruskal y Prim obtienen la misma longitud mínima. Se diferencian en cómo eligen el siguiente enlace. Kruskal ordena toda la lista. Prim mantiene una cola que crece con el árbol. "
+    "En el grafo denso más grande de nuestra prueba, Kruskal fue más rápido. Para acercarnos a un diseño de obra, falta evaluar rutas, costos por tramo y enlaces de respaldo.",
     "Ilustración de cierre: una red de fibra granate completa sobre un mapa esquemático del Perú, con tres medallas o insignias "
     "que representan ahorro, teoría comprobada y elección del algoritmo. " + ESTILO_IMG)
 
@@ -733,7 +735,15 @@ def prompts():
                  "Si la imagen sale con texto deformado, pida: \"Repite la imagen sin ningún texto\".\n")
 
 
-def guiones():
+def guiones(deck="FibraNet_Slides.html", sufijo=""):
+    def guardar(nombre, lineas):
+        ruta = os.path.join(TEMA, "05_guiones", f"{nombre}{sufijo}.md")
+        if sufijo:
+            with open(ruta, "x", encoding="utf-8", newline="\n") as archivo:
+                archivo.write("\n".join(lineas) + "\n")
+        else:
+            escribir(ruta, "\n".join(lineas) + "\n")
+
     total = lambda o: sum(int(l["time"].split(":")[0]) * 60 + int(l["time"].split(":")[1]) for l in L if l["owner"] == o)
     mmss = lambda s: f"{s // 60}:{s % 60:02d}"
     # 1) División de trabajo
@@ -741,25 +751,25 @@ def guiones():
          "Regla del grupo: **todos** deben poder explicar el motor (Union-Find, Kruskal y Prim). Por eso cada integrante,"
          " además de su bloque, estudia una parte del motor y puede responder preguntas sobre ella.", "",
          "| # | Integrante | Láminas | Bloque | Tiempo | Archivos de código que domina |", "|---|---|---|---|---|---|"]
-    domina = {1: "Main.java (menú) · LectorCsv.java", 2: "Grafo.java · Arista.java (compareTo)", 3: "UnionFind.java · UnionFindIngenuo.java",
+    domina = {1: "Main.java · LectorCoordenadas.java · Geo.java", 2: "Grafo.java · Arista.java (compareTo)", 3: "UnionFind.java · UnionFindIngenuo.java",
               4: "Kruskal.java · ResultadoMST.java", 5: "Prim.java · Grafo.tramosDe", 6: "Benchmark.java · Pruebas.java · Tabla.java"}
     for o in range(1, 7):
         nums = [i for i, l in enumerate(L, 1) if l["owner"] == o]
         b = next(x for x in BLOQUES if x["owner"] == o)
         d.append(f"| C{o} | {EQUIPO[o - 1]} | {nums[0]:02d}–{nums[-1]:02d} | {b['name']} | {mmss(total(o))} | {domina[o]} |")
     tot = sum(total(o) for o in range(1, 7))
-    d += ["", f"Tiempo total estimado: **{mmss(tot)}** (sin demo en vivo ni preguntas).", "",
+    d += ["", f"Tiempo total estimado: **{mmss(tot)}** (incluye la demo breve de la lámina 17. Las preguntas van después).", "",
           "## Tareas antes de la expo", "",
           "| Fecha | Tarea | Responsable |", "|---|---|---|",
-          "| 02/12 | Generar las imágenes con los prompts de `04_slides` y guardarlas en `03_ppt\\img\\` | Cada uno las de sus láminas |",
+          "| 02/12 | Comprobar las imágenes y la opción 10 en el equipo de exposición | Todos |",
           "| 03/12 | Leer su guion en voz alta y cronometrarlo | Todos |",
           "| 04/12 | Repasar el motor: cada quien explica a otro un archivo que no es suyo | Todos (en parejas C1–C3, C2–C4, C5–C6) |",
           "| 06/12 | Estudio del código en grupo: recorrido completo de `UnionFind`, `Kruskal` y `Prim` | Todos |",
           "| 07/12 | Ensayo general con el deck y demo en vivo | Todos |", "",
           "## Cómo usar el deck", "",
-          "Abrir `5a_FibraNet\\03_ppt\\FibraNet_Slides.html` en Chrome o Edge. Teclas: flechas para avanzar, **N** guion, **O** índice, **F** pantalla completa, **P** exportar PDF.",
+          f"Abrir `5a_FibraNet\\03_ppt\\{deck}` en Chrome o Edge. Teclas: flechas para avanzar, **N** guion, **O** índice, **F** pantalla completa, **P** exportar PDF.",
           "En las láminas 10, 13 y 16 use los botones **Paso ▶** del simulador."]
-    escribir(os.path.join(TEMA, "05_guiones", "division_de_trabajo.md"), "\n".join(d) + "\n")
+    guardar("division_de_trabajo", d)
     # 2) Guion completo
     g = ["# Guion de exposición · 5.a FibraNet", "",
          "Cada bloque indica quién habla, el tiempo objetivo y el texto sugerido. No hay que memorizarlo palabra por palabra: la idea es decir esto con sus palabras.", ""]
@@ -772,7 +782,7 @@ def guiones():
         siguiente = CORTO[o] if o < 6 else None
         if siguiente:
             g += [f"*Pase:* \"Ahora {siguiente} les explica {BLOQUES[o]['name'].split('·')[-1].strip().lower()}.\"", ""]
-    escribir(os.path.join(TEMA, "05_guiones", "guion_exposicion.md"), "\n".join(g) + "\n")
+    guardar("guion_exposicion", g)
 
 
 if __name__ == "__main__":
