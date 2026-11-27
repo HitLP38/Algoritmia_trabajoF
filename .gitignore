@@ -11,3 +11,6 @@ rubrica de evaluacion/
 Thumbs.db
 desktop.ini
 ~$*
+
+# Copia lista para subir a Drive (se arma desde las carpetas versionadas)
+ENTREGA_DRIVE/
