@@ -68,12 +68,14 @@ def cargar_bench():
     import csv
     prueba = os.path.join(AQUI, "bench5a")
     base = prueba if os.path.isdir(prueba) else os.path.join(COD, "benchmark")
+    with open(os.path.join(base, "resultados_mst.csv"), encoding="utf-8", newline="") as archivo:
+        filas_mst = list(csv.DictReader(archivo))
     mst = [[r["densidad"], int(r["V"]), int(r["E"]), float(r["kruskal_ms"]), float(r["prim_ms"])]
-           for r in csv.DictReader(open(os.path.join(base, "resultados_mst.csv")))]
+           for r in filas_mst]
     uf = [[int(r["n"]), int(r["operaciones"]), float(r["optimizado_ns_por_op"]),
            float(r["ingenuo_ns_por_op"]) if r["ingenuo_ns_por_op"] else None]
           for r in csv.DictReader(open(os.path.join(base, "resultados_unionfind.csv")))]
-    return dict(mst=mst, uf=uf, preliminar=(base == prueba))
+    return dict(mst=mst, uf=uf, estadisticas_mst=filas_mst, preliminar=(base == prueba))
 
 BENCH = cargar_bench()
 # rango de ns/op del Union-Find optimizado desde n = 5 000 (antes el JIT aún no se estabiliza)
@@ -99,10 +101,41 @@ def ent(x):
     return f"{x:,}".replace(",", " ")
 
 def tabla_mst():
-    filas = "".join(
-        f'<tr><td>{r[0]}</td><td class="m">{ent(r[1])}</td><td class="m">{ent(r[2])}</td><td class="m">{num(r[3])}</td><td class="m">{num(r[4])}</td><td class="m"><b>{num(r[4] / r[3], 2)}×</b></td></tr>'
-        for r in BENCH["mst"] if r[1] in (1000, 10000, 50000))
-    return f'<table class="compact"><tr><th>Red</th><th>V</th><th>E</th><th>Kruskal ms</th><th>Prim ms</th><th>Prim / Kruskal</th></tr>{filas}</table>'
+    detallado = "kruskal_desv" in BENCH["estadisticas_mst"][0]
+    filas = []
+    for r in BENCH["estadisticas_mst"]:
+        if int(r["V"]) not in (1000, 10000, 50000):
+            continue
+        def medida(alg):
+            media = num(float(r[alg + "_ms"]), 2)
+            desv = r.get(alg + "_desv")
+            return media + (" ± " + num(float(desv), 2) if desv else "")
+        teorico = (num(float(r["kruskal_teorico_ms"]), 2) + " / " +
+                   num(float(r["prim_teorico_ms"]), 2)) if detallado else "—"
+        valores = (r["densidad"], ent(int(r["V"])), medida("kruskal"), medida("prim"), teorico)
+        filas.append("<tr>" + "".join(f'<td class="m">{v}</td>' for v in valores) + "</tr>")
+    return ('<table class="compact bench-mst"><tr><th>Red</th><th>V</th><th>Kruskal (ms)</th>'
+            '<th>Prim (ms)</th><th>Ajuste K / P (ms)</th></tr>' + "".join(filas) + "</table>")
+
+
+def resumen_mst():
+    from statistics import mean
+    densas = [r for r in BENCH["estadisticas_mst"] if r["densidad"] == "densa"]
+    mayor = max(densas, key=lambda r: int(r["V"]))
+    tiempos = (num(float(mayor["kruskal_ms"]), 2), num(float(mayor["prim_ms"]), 2))
+    if "kruskal_teorico_ms" not in mayor:
+        return tiempos, "Comparamos el crecimiento con E log₂V.", ""
+    error = {a: mean(abs(float(r[a + "_ms"]) / float(r[a + "_teorico_ms"]) - 1)
+                     for r in densas) * 100 for a in ("kruskal", "prim")}
+    contraste = (f"En densas, error relativo medio del ajuste c·E·log₂V: "
+                 f"<b>{num(error['kruskal'])} %</b> Kruskal, <b>{num(error['prim'])} %</b> Prim.")
+    oral = (f"En densas, el error relativo medio del ajuste fue {num(error['kruskal'])} por ciento para Kruskal "
+            f"y {num(error['prim'])} para Prim. Alternamos qué algoritmo empieza cada corrida.")
+    return tiempos, contraste, oral
+
+
+MST_TIEMPOS, MST_CONTRASTE, MST_ORAL = resumen_mst()
+
 
 def tabla_uf():
     filas = "".join(
@@ -278,8 +311,8 @@ lam(2, "Teoría del MST", "Especificación y complejidad", "1:10", '''
       <tr><td><b>Invariante</b></td><td>T siempre está contenido en algún bosque de expansión mínima (un árbol si G es conexo)</td></tr></table></div>
     <div class="panel acc"><span class="tag">Costo (V sedes, E tramos)</span><table class="compact grande">
       <tr><th>Operación</th><th>Peor O</th><th>Mejor Ω</th><th>Típico Θ</th></tr>
-      <tr><td>Kruskal</td><td class="m">V + E log E</td><td class="m">V + E</td><td class="m">V + E log V</td></tr>
-      <tr><td>Prim (heap)</td><td class="m">V + E log V</td><td class="m">V + E</td><td class="m">V + E log V</td></tr>
+      <tr><td>Kruskal</td><td class="m">V + E log E</td><td class="m">V + E</td><td class="m">V + E log E</td></tr>
+      <tr><td>Prim (heap)</td><td class="m">V + E log E</td><td class="m">V + E</td><td class="m">V + E log E</td></tr>
       <tr><td>find / union</td><td class="m">α(n)*</td><td class="m">1</td><td class="m">α(n)*</td></tr>
       <tr><td>UF ingenuo</td><td class="m">n</td><td class="m">1</td><td class="m">n</td></tr>
       <tr><td>Memoria</td><td colspan="3" class="m">O(V + E)</td></tr></table>
@@ -288,7 +321,7 @@ lam(2, "Teoría del MST", "Especificación y complejidad", "1:10", '''
     "Formalmente, la entrada es un grafo con pesos no negativos y la salida un subconjunto de aristas de costo mínimo, sin ciclos. "
     "Si el grafo es conexo da V menos 1 aristas; si no, da un árbol por componente. "
     "El invariante que garantiza la correctitud es que el conjunto elegido siempre está contenido en algún bosque de expansión mínima; si la red es conexa, ese bosque es un árbol. "
-    "En costo: los dos pagan V por recorrer las sedes; Kruskal suma E log E por el ordenamiento y Prim con montículo E log V. "
+    "En costo: los dos pagan V por recorrer las sedes; Kruskal ordena E aristas y el montículo de Prim perezoso puede guardar O(E) entradas. La cota general de los dos es O(V + E log E). "
     "Si no hay tramos repetidos entre el mismo par de sedes, E es a lo más V al cuadrado y log E es a lo más 2 log V, así que son del mismo orden. "
     "Union-Find optimizado cuesta alfa de n amortizado, que en la práctica es una constante menor o igual a 4.",
     "Ilustración de una pizarra académica con fórmulas de complejidad O(E log V) y α(n), y una gráfica pequeña de curvas que crecen "
@@ -509,14 +542,14 @@ lam(6, "Resultados", "Benchmark: Kruskal vs Prim", "1:20", f'''
     <svg id="grafMST" style="width:100%;height:100%;min-height:0"></svg>
     <div style="display:flex;flex-direction:column;gap:12px">
       {tabla_mst()}
-      <div class="panel acc"><span class="tag">Contraste con la teoría</span><p>En redes densas, el cociente de Prim pasa de <b>31,6 a 75,4 ns</b>. Las razones normalizadas varían con el tamaño y la densidad.</p></div>
-      <p style="font-size:16px;color:var(--muted)">Semilla 2026 · 2 calentamientos · promedio de 5 corridas · redes dispersas (E = 4V) y densas (E ≈ V log V).</p>
+      <div class="panel acc"><span class="tag">Contraste con la teoría</span><p>{MST_CONTRASTE}</p></div>
+      <p style="font-size:16px;color:var(--muted)">Semilla 2026 · 2 calentamientos · 5 corridas · ± desviación estándar.</p>
       {AVISO}
     </div>
   </div>''',
     "Este benchmark se hizo con grafos sintéticos, de mil a cincuenta mil sedes. Para cada tamaño promediamos cinco corridas, después de dos de calentamiento. "
-    "En el grafo denso de cincuenta mil sedes, Kruskal tardó 284,19 milisegundos y Prim 918,52. "
-    "Al dividir por E log V, las razones varían según el tamaño y la densidad. Esta medición compara el rendimiento en nuestra PC.",
+    f"En el grafo denso de cincuenta mil sedes, Kruskal promedió {MST_TIEMPOS[0]} milisegundos y Prim {MST_TIEMPOS[1]}. "
+    f"{MST_ORAL}",
     "Imagen de apoyo opcional: un cronómetro estilizado junto a dos curvas ascendentes, una granate y otra azul, que compiten en una carrera "
     "sobre una cuadrícula técnica. " + ESTILO_IMG)
 
@@ -533,20 +566,20 @@ lam(6, "Resultados", "Benchmark: Union-Find", "1:10", f'''
     </div>
   </div>''',
     "Aquí comparamos Union-Find sin optimizar contra el optimizado, en escala logarítmica en los dos ejes. "
-    "La versión ingenua crece en línea recta: cada vez que n se duplica, el costo por operación también, porque los árboles se vuelven listas largas. "
+    "La versión ingenua aumenta su costo por operación de forma general, aunque los puntos no crecen de manera uniforme. La secuencia de uniones forma cadenas largas. "
     f"La versión con compresión y unión por rango se mantiene casi plana, entre {UF_MIN} y {UF_MAX} nanosegundos por operación desde cinco mil hasta un millón de elementos. "
     f"Con veinte mil elementos ya es unas {UF_VECES_TXT} veces más rápida. "
-    "Eso confirma en la práctica que alfa de n se comporta como una constante.",
+    "El crecimiento observado es compatible con el costo amortizado de la estructura optimizada.",
     "Imagen de apoyo opcional: comparación visual de dos árboles, uno alto y delgado como una escalera (ingenuo) y otro bajo y ancho como un "
     "arbusto (optimizado), con un velocímetro a cada lado. " + ESTILO_IMG)
 
 # 20 ─ Conclusiones
-lam(6, "Resultados", "Conclusiones", "1:00", '''
+lam(6, "Resultados", "Conclusiones", "1:00", f'''
   <div class="eyebrow"><b>18</b> Resultados</div>
   <h2>Conclusiones y trabajo futuro</h2>
   <div class="cols c3 concl">
     <div class="panel acc"><span class="tag">1 · Resultado</span><b class="kpi">4&#8239;081,4 <small>km</small></b><p>24 tramos para 25 sedes. <b>76 % menos km</b> frente a los 16&#8239;975,1 km candidatos.</p></div>
-    <div class="panel acc"><span class="tag">2 · Benchmark</span><b class="kpi">E log V</b><p>Kruskal y Prim dan el mismo costo. En el benchmark denso de 50 000 sedes, Kruskal tardó 284,19 ms y Prim 918,52 ms.</p></div>
+    <div class="panel acc"><span class="tag">2 · Benchmark</span><b class="kpi">E log V</b><p>Kruskal y Prim dan el mismo costo. En el benchmark denso de 50 000 sedes, Kruskal promedió {MST_TIEMPOS[0]} ms y Prim {MST_TIEMPOS[1]} ms.</p></div>
     <div class="panel acc"><span class="tag">3 · Cómo eligen</span><b class="kpi">K <small>o</small> P</b><p><b>Kruskal</b> ordena los candidatos. <b>Prim</b> elige desde la frontera del árbol.</p></div>
   </div>
   <div class="panel gold"><span class="tag">Trabajo futuro</span><p>Evaluar trazados de obra, costos por tramo y enlaces de respaldo.</p></div>''',
@@ -600,6 +633,7 @@ lam(6, "Cierre", "Preguntas y gracias", "0:30", f'''
 # CSS propio de FibraNet (se suma al del Laboratorio 2)
 # ---------------------------------------------------------------------------
 CSS_EXTRA = """
+.bench-mst th,.bench-mst td{font-size:14px;white-space:nowrap}
 .cover h1{font-size:120px}
 .imgbox{flex:1;min-height:0;border:1.5px solid var(--rule);background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .mapa-caso{position:relative;min-height:0;border:1.5px solid var(--rule);background:#fff;display:grid}

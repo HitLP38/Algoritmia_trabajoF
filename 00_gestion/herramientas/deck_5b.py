@@ -260,15 +260,48 @@ def laminas():
         '<p class="lead">49 nodos · 48 tramos iniciales · 16 eventos procesados sin errores</p>',
         "Tras el primer corte hay doce clientes simulados sin luz. Con ambos cortes activos hay veinte. Al reponer A quedan ocho en B. Al reponer B quedan cero. Se confirma además la vuelta de las rutas para los clientes consultados.",
         "Línea de tiempo de los cuatro cambios con 12, 20, 8 y 0 clientes simulados sin luz.")
-    datos = "".join(f"<tr><td>{numero(n)}</td><td>{numero(a,2)}</td><td>{numero(b,2) if b is not None else '—'}</td></tr>"
-                    for n,a,b in filas)
+    csv_perfiles = TEMA / "06_codigo/benchmark/resultados_lct_perfiles.csv"
+    if csv_perfiles.exists() and not preliminar:
+        with csv_perfiles.open(encoding="utf-8", newline="") as archivo:
+            perfiles = {(r["perfil"], int(r["N"])): r for r in csv.DictReader(archivo)}
+
+        def valor(perfil, n, campo, decimales=2):
+            return numero(float(perfiles[perfil, n][campo]), decimales)
+
+        resumen = []
+        for n in (1000, 2000):
+            contenido = "".join(f'<td>{valor(p, n, "veces_mas_rapido")}×</td>' for p in "ABC")
+            resumen.append(f"<tr><td>BFS/LCT · {numero(n)}</td>{contenido}</tr>")
+        normas = "".join(f'<td>{valor(p, 100000, "lct_ns_por_MlogN", 1)}</td>' for p in "ABC")
+        resumen.append(f"<tr><td>LCT ns/(M log₂N) · 100 000</td>{normas}</tr>")
+        tabla = ('<table class="compact perfiles"><tr><th>Indicador · N</th><th>A</th><th>B</th><th>C</th></tr>'
+                 + "".join(resumen) + '</table>')
+        detalle = ('<p class="perfil-clave">A: profundo, 40/30/30 · B: aleatorio, 40/30/30 · C: profundo, 80/10/10 '
+                   '(LUZ/CORTAR/CONECTAR).</p>')
+        resumen_a = (f'Perfil A · {razon}× a 5 000. A 100 000 operaciones, '
+                     f'LCT: {ms_ultimo} ± {valor("A", 100000, "lct_desv")} ms.')
+        oral = (
+            f"Este gráfico muestra los tiempos medidos del perfil A. Con mil nodos, cambiar a un árbol aleatorio "
+            f"eleva la relación BFS sobre LCT de {valor('A',1000,'veces_mas_rapido')} a {valor('B',1000,'veces_mas_rapido')}. "
+            f"Con más consultas y el mismo árbol profundo, sube a {valor('C',1000,'veces_mas_rapido')}. "
+            f"A dos mil, B y C quedan más cerca. Para cien mil solo comparamos el LCT, normalizado por M log₂ N. "
+            f"En A tardó {ms_ultimo} milisegundos de media, con desviación estándar de {valor('A',100000,'lct_desv')}."
+        )
+    else:
+        datos = "".join(f"<tr><td>{numero(n)}</td><td>{numero(a,2)}</td><td>{numero(b,2) if b is not None else '—'}</td></tr>"
+                        for n,a,b in filas)
+        tabla = ('<table class="compact"><tr><th>N = M</th><th>LCT (ms)</th><th>BFS (ms)</th></tr>'
+                 + datos + '</table>')
+        detalle = ""
+        resumen_a = f"Relación BFS/LCT: {razon}× con N = M = {numero(comparable[0])}."
+        oral = f"Cada tamaño ejecuta el mismo lote cuando se miden ambas versiones. Con cien mil operaciones, LCT tardó {ms_ultimo} milisegundos."
+
     lam("Benchmark · Link-Cut Tree frente a BFS", "1:20",
-        '<div class="cols c64"><svg id="grafLct" class="graf" role="img" aria-label="Tiempos de LCT y BFS"></svg>'
-        '<div class="pila"><div class="panel"><span class="tag">'+estado+'</span>'
-        '<table class="compact"><tr><th>N = M</th><th>LCT (ms)</th><th>BFS (ms)</th></tr>'+datos+'</table></div>'
-        + panel(f"{razon}×", f"Relación BFS/LCT con N = M = {numero(comparable[0])}.", "acc")+'</div></div>',
-        f"Esta gráfica usa {estado.lower()}. Cada tamaño ejecuta el mismo lote para ambas versiones cuando hay medición de BFS. Con cinco mil nodos y operaciones, la relación de tiempos fue {razon} a uno. Con cien mil operaciones, LCT tardó {ms_ultimo} milisegundos.",
-        "Gráfico técnico de dos series con escalas logarítmicas. Tomar los valores del CSV y respetar los puntos ausentes.")
+        '<div class="cols c64"><svg id="grafLct" class="graf" role="img" aria-label="Tiempos de LCT y BFS del perfil A"></svg>'
+        '<div class="pila"><div class="panel"><span class="tag">'+estado+'</span>'+tabla+detalle+'</div>'
+        + panel("Corrida del perfil A", resumen_a, "acc")+'</div></div>',
+        oral,
+        "Gráfico de los tiempos medidos en el perfil A y comparación de perfiles. Usar los datos del CSV y respetar los puntos ausentes.")
     lam("Qué muestra RedLuz", "1:00",
         fila(panel(f"{ms_ultimo} ms", f"LCT para {numero(ultimo[0])} operaciones del benchmark.", "acc"),
              panel("Cortes y reposiciones", "Las consultas cambian con el estado de cada componente.", "gold")) +
@@ -303,7 +336,7 @@ CSS = """
 #simRed{display:flex;flex:1;min-height:0;flex-direction:column;gap:14px}#simGrafo .cortado{stroke:var(--granate);stroke-dasharray:10 8}
 #simGrafo .sin-luz{fill:var(--granate-soft);stroke:var(--granate)}#simTraza ol{margin:6px 0 0;padding-left:26px;font:15px/1.38 var(--f-mono)}
 .ax{font:500 14px var(--f-mono);fill:var(--muted)}.axl,.lg{font:600 15px var(--f-body);fill:var(--ink)}
-.caso td,.caso th{font-size:21px}.dorada{border-color:var(--oro);background:var(--oro-soft)}
+.perfiles td,.perfiles th{font-size:16px}.perfil-clave{font-size:15px;margin-top:13px}.caso td,.caso th{font-size:21px}.dorada{border-color:var(--oro);background:var(--oro-soft)}
 """
 
 HUD = """<div id="hud"><button class="navbtn" id="bPrev" aria-label="Anterior">◀</button><button class="navbtn" id="bNext" aria-label="Siguiente">▶</button><button class="navbtn" id="bOv">Índice (O)</button><button class="navbtn" id="bNotes">Guion (N)</button><button class="navbtn" id="bFs">Pantalla (F)</button><button class="navbtn" id="bPdf">Exportar PDF (P)</button></div>
@@ -340,6 +373,7 @@ def mmss(seg):
 
 
 def generar(nombre):
+    sufijo = Path(nombre).stem.removeprefix("RedLuz_Slides")
     filas = laminas()
     total = sum(segundos(l["time"]) for l in LAMINAS)
     assert len(LAMINAS)==22 and total<=25*60
@@ -358,13 +392,14 @@ def generar(nombre):
             guion.extend(["",f'### Lámina {i:02} · {l["title"]} ({l["time"]})',"",l["notes"]])
             img=f"L{i:02}"
             uso="Se usa en el deck. El SVG integrado sirve de respaldo." if l["imagen"] else "Imagen opcional de apoyo."
-            materiales[TEMA/"04_slides"/f"{img}.txt"] = (
-                f'Lámina {i:02} · {l["title"]}\nExpone: {persona}\n\n{uso}\n'
-                f'Guardar como 5b_RedLuz/03_ppt/img/{img}.png\n\n{l["prompt"]}\n')
+            if not sufijo:
+                materiales[TEMA/"04_slides"/f"{img}.txt"] = (
+                    f'Lámina {i:02} · {l["title"]}\nExpone: {persona}\n\n{uso}\n'
+                    f'Guardar como 5b_RedLuz/03_ppt/img/{img}.png\n\n{l["prompt"]}\n')
     reparto.extend(["", f"Abre {nombre} en Edge o Chrome. N muestra el guion y O abre el índice. "
                        "El simulador de la lámina 17 admite avanzar, retroceder y reiniciar."])
-    materiales[TEMA/"05_guiones/guion_exposicion.md"]="\n".join(guion)+"\n"
-    materiales[TEMA/"05_guiones/division_de_trabajo.md"]="\n".join(reparto)+"\n"
+    materiales[TEMA/"05_guiones"/f"guion_exposicion{sufijo}.md"]="\n".join(guion)+"\n"
+    materiales[TEMA/"05_guiones"/f"division_de_trabajo{sufijo}.md"]="\n".join(reparto)+"\n"
     for path in materiales:
         if path.exists():
             raise FileExistsError(path)

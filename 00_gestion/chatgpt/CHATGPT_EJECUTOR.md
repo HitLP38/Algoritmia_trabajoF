@@ -72,12 +72,14 @@ Fases: **1** = 5.a con el caso real · **2** = 5.b (requiere el código del caso
 | 3 | **P5A-02** | `41e424a0` | `prompts/P5A-02_benchmark_pc.md` | CSV del benchmark en PC | Informe 5.a v3 con tiempos reales | ✅ |
 | 3 | **P5B-05** | `67f83fcc` | `prompts/P5B-05_benchmark_pc.md` | CSV del benchmark en PC | Informe 5.b v3 con tiempos reales | ✅ |
 | 4 | **PGEN-01** | `515f3802` | `prompts/PGEN-01_revision_rubrica.md` | todo lo anterior | Revisión contra la rúbrica | ✅ |
-| 5 | **P5A-06** | `cb77a978` | `prompts/P5A-06_sobresaliente_5a.md` | Benchmark 5.a re-corrido en PC (27/11) | Informe 5.a v4 + deck v5 (Sobresaliente) | ⏳ |
-| 5 | **P5B-06** | `8c9a61ba` | `prompts/P5B-06_sobresaliente_5b.md` | Benchmark 5.b re-corrido en PC (27/11) | Informe 5.b v4 + deck nuevo (Sobresaliente) | ⏳ |
+| 5 | **P5A-06** | `cb77a978` | `prompts/P5A-06_sobresaliente_5a.md` | Benchmark 5.a re-corrido en PC (27/11) | Informe 5.a v4 + deck v5 (Sobresaliente) | ✅ |
+| 5 | **P5B-06** | `8c9a61ba` | `prompts/P5B-06_sobresaliente_5b.md` | Benchmark 5.b re-corrido en PC (27/11) | Informe 5.b v4 + deck nuevo (Sobresaliente) | ✅ |
 <!-- /TABLA -->
 
 ## 7. Bitácora (más reciente arriba)
 
+- 26/11/2026 · P5B-06 completado. Informe_RedLuz_v4.docx y RedLuz_Slides_v2.html incorporan los perfiles A, B y C. Guion y reparto v2, y ZIP verificado.
+- 26/11/2026 · P5A-06 completado. Informe_FibraNet_v4.docx y FibraNet_Slides_v5.html incorporan la dispersión, los ajustes teóricos y la nueva corrida. ZIP del anexo verificado.
 - 26/11/2026 · P5B-04 completado. Guion y reparto verificados (22 láminas, 24:20). Se agregaron 12 preguntas del jurado con respuestas.
 - 26/11/2026 · P5B-03 completado. L01.png y L08.png guardadas en 5b_RedLuz/03_ppt/img/ y verificadas en el deck.
 - 26/11/2026 · P5B-02 completado. RedLuz_Slides.html tiene 22 láminas, simulador de LCT, 22 prompts y dos guiones de apoyo (24:20).

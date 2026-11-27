@@ -12,19 +12,30 @@ os.makedirs(O, exist_ok=True)
 plt.rcParams.update({'font.family': 'serif', 'font.size': 7})
 r = list(csv.DictReader(open(os.path.join(B, 'resultados_lct.csv'))))
 
-# Fig. 3: tiempo total LCT vs BFS (log-log)
+# Tiempo del perfil A. El tramo extrapolado de BFS tiene un estilo propio.
 fig, ax = plt.subplots(figsize=(3.4, 2.4))
 b = [x for x in r if x['bfs_ms']]
-ax.set_xscale('log'); ax.set_yscale('log')
-for filas, col, mk, nom, clave in ((r, 'black', 'o', 'Link-Cut Tree', 'lct'), (b, 'gray', 's', 'BFS (ingenuo)', 'bfs')):
+ax.set(xscale='log', yscale='log', xlabel='N = M (nodos y operaciones)', ylabel='Tiempo total (ms)')
+for filas, color, marca, nombre, clave in (
+    (r, 'black', 'o', 'LCT medido', 'lct'),
+    (b, '#5B6570', 's', 'BFS medido', 'bfs'),
+):
     X = [int(x['N']) for x in filas]
     err = [float(x[clave + '_desv']) for x in filas] if clave + '_desv' in filas[0] else None
-    ax.errorbar(X, [float(x[clave + '_ms']) for x in filas], yerr=err, fmt=mk, ls='none', color=col, ms=3, capsize=2, lw=0.7, label=nom)
-    if clave + '_teorico_ms' in r[0]:
-        ax.plot(X, [float(x[clave + '_teorico_ms']) for x in filas], '--' if clave == 'bfs' else '-', color=col, lw=0.8)
-ax.set_xlabel('N = M (nodos y operaciones)'); ax.set_ylabel('Tiempo total (ms)'); ax.legend(fontsize=6.5)
-ax.text(0.02, 0.97, 'líneas: c·M·log₂N (LCT) y c·M·N (BFS)', transform=ax.transAxes, fontsize=5.5, va='top', style='italic')
-fig.tight_layout(); fig.savefig(os.path.join(O, 'fig_lct.png'), dpi=300)
+    ax.errorbar(X, [float(x[clave + '_ms']) for x in filas], yerr=err, fmt=marca, color=color,
+                ms=3, capsize=2, lw=0.75, label=nombre)
+    campo = clave + '_teorico_ms'
+    if campo in r[0]:
+        ax.plot(X, [float(x[campo]) for x in filas], color=color, lw=0.9,
+                label='Ajuste LCT' if clave == 'lct' else 'Ajuste BFS')
+        if clave == 'bfs' and len(b) < len(r):
+            futuro = r[len(b)-1:]
+            ax.plot([int(x['N']) for x in futuro], [float(x[campo]) for x in futuro],
+                    ls='--', color=color, lw=0.9, label='Proyección BFS')
+ax.set_xlim(int(r[0]['N']) * 0.8, int(r[-1]['N']) * 1.25)
+ax.legend(fontsize=5.8, loc='upper left')
+fig.tight_layout()
+fig.savefig(os.path.join(O, 'fig_lct.png'), dpi=300)
 
 # Fig. 4: tiempo normalizado por la cota
 fig, ax = plt.subplots(figsize=(3.4, 2.2))

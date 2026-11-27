@@ -25,14 +25,32 @@ for d in ['dispersa','densa']:
 ax.set_xlabel('E·log₂V (millones)'); ax.set_ylabel('Tiempo (ms)'); ax.legend(fontsize=6)
 ax.text(0.98,0.03,'líneas: c·E·log₂V ajustada',transform=ax.transAxes,fontsize=5.5,ha='right',va='bottom',style='italic')
 fig.tight_layout(); fig.savefig(os.path.join(O,'fig_mst.png'),dpi=300)
-# Fig: UF ns/op
-u=list(csv.DictReader(open(os.path.join(B,'resultados_unionfind.csv'))))
-fig,ax=plt.subplots(figsize=(3.4,2.4))
-ax.loglog([int(x['n']) for x in u],[float(x['optimizado_ns_por_op']) for x in u],'o-',color='black',ms=3,label='Optimizado (compresión + rango)')
-ui=[x for x in u if x['ingenuo_ns_por_op']]
-ax.loglog([int(x['n']) for x in ui],[float(x['ingenuo_ns_por_op']) for x in ui],'s--',color='gray',ms=3,label='Ingenuo')
-ax.set_xlabel('n (elementos)'); ax.set_ylabel('ns por operación'); ax.legend(fontsize=6.5)
-fig.tight_layout(); fig.savefig(os.path.join(O,'fig_uf.png'),dpi=300)
+# Fig: tiempos totales de las dos variantes de Union-Find.
+with open(os.path.join(B, 'resultados_unionfind.csv'), newline='', encoding='utf-8') as archivo:
+    u = list(csv.DictReader(archivo))
+fig, ax = plt.subplots(figsize=(3.4, 2.4))
+for alg, color, marker, label in (
+    ('optimizado', 'black', 'o', 'Optimizado'),
+    ('ingenuo', 'gray', 's', 'Ingenuo'),
+):
+    campo = alg + '_ms'
+    medidos = [fila for fila in u if fila[campo]]
+    ax.errorbar([int(fila['n']) for fila in medidos], [float(fila[campo]) for fila in medidos],
+                yerr=[float(fila[alg + '_desv']) for fila in medidos] if alg + '_desv' in u[0] else None,
+                fmt=marker, color=color, ms=3, capsize=2, lw=0.7, label=label)
+    teorico = alg + '_teorico_ms'
+    if teorico in u[0]:
+        ajuste = u[:len(medidos)]
+        ax.plot([int(fila['n']) for fila in ajuste], [float(fila[teorico]) for fila in ajuste],
+                color=color, lw=0.9, label='Ajuste lineal' if alg == 'optimizado' else 'Ajuste cuadrático')
+        if len(medidos) < len(u):
+            proyeccion = u[len(medidos)-1:]
+            ax.plot([int(fila['n']) for fila in proyeccion], [float(fila[teorico]) for fila in proyeccion],
+                    color=color, lw=0.9, ls='--', label='Proyección ingenua')
+ax.set(xscale='log', yscale='log', xlabel='n (elementos)', ylabel='Tiempo total (ms)')
+ax.legend(fontsize=5.8, loc='upper left')
+fig.tight_layout()
+fig.savefig(os.path.join(O, 'fig_uf.png'), dpi=300)
 # Fig: arquitectura
 fig,ax=plt.subplots(figsize=(3.4,2.5)); ax.axis('off'); ax.set_xlim(0,12); ax.set_ylim(0,8.4)
 def box(x,y,w,h,t,fc):
