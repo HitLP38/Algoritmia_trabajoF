@@ -65,8 +65,8 @@ Fases: **1** = 5.a con el caso real · **2** = 5.b (requiere el código del caso
 | 2 | **P5B-00** | `a88754d8` | `prompts/P5B-00_datos_reales.md` | — | Datos reales del distrito y cortes programados | 🔄 |
 | 2 | **P5B-01** | `7517f248` | `prompts/P5B-01_informe_caso_real.md` | P5B-00 validado por Claude | Informe 5.b v2 (caso real) | ✅ |
 | 2 | **P5B-02** | `9475593e` | `prompts/P5B-02_deck.md` | P5B-01 | Deck HTML 5.b + prompts + guiones | ✅ |
-| 2 | **P5B-03** | `937e3ce4` | `prompts/P5B-03_imagenes.md` | P5B-02 | Imágenes de 5.b | ⏳ |
-| 2 | **P5B-04** | `c9262df5` | `prompts/P5B-04_guiones.md` | P5B-02 | Guiones y preguntas 5.b | ⏳ |
+| 2 | **P5B-03** | `70ccfe51` | `prompts/P5B-03_imagenes.md` | P5B-02 | Imágenes de 5.b | ✅ |
+| 2 | **P5B-04** | `27d14b54` | `prompts/P5B-04_guiones.md` | P5B-02 | Guiones y preguntas 5.b | ✅ |
 | 3 | **P5A-02** | `84b0cba1` | `prompts/P5A-02_benchmark_pc.md` | CSV del benchmark en PC | Informe 5.a v3 con tiempos reales | ✅ |
 | 3 | **P5B-05** | `48150377` | `prompts/P5B-05_benchmark_pc.md` | CSV del benchmark en PC | Informe 5.b v3 con tiempos reales | ✅ |
 | 4 | **PGEN-01** | `515f3802` | `prompts/PGEN-01_revision_rubrica.md` | todo lo anterior | Revisión contra la rúbrica | ⏳ |
@@ -74,6 +74,8 @@ Fases: **1** = 5.a con el caso real · **2** = 5.b (requiere el código del caso
 
 ## 7. Bitácora (más reciente arriba)
 
+- 26/11/2026 · P5B-04 completado. Guion y reparto verificados (22 láminas, 24:20). Se agregaron 12 preguntas del jurado con respuestas.
+- 26/11/2026 · P5B-03 completado. L01.png y L08.png guardadas en 5b_RedLuz/03_ppt/img/ y verificadas en el deck.
 - 26/11/2026 · P5B-02 completado. RedLuz_Slides.html tiene 22 láminas, simulador de LCT, 22 prompts y dos guiones de apoyo (24:20).
 - 26/11/2026 · P5B-05 completado. Informe_RedLuz_v3.docx incorpora el benchmark de la PC del grupo.
 - 26/11/2026 · P5B-01 completado. Informe_RedLuz_v2.docx documenta Magdalena del Mar y la ejecución de los 16 eventos del modelo radial.
