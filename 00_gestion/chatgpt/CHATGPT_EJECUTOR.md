@@ -51,6 +51,8 @@ rubrica de evaluacion/            rúbrica y Laboratorio2_Slides_v2.html (estilo
 
 **Entorno de la PC del grupo (para la tabla "Entorno de ejecución" de los informes):** Intel Core i3-1005G1 @ 1,20 GHz · 16 GB de RAM · OpenJDK 21.0.12.1 (Eclipse Temurin) · Windows 10 · 4 núcleos · JVM con 4 042 MB. **5.a ya tiene tiempos reales** (26/11): `5a_FibraNet/06_codigo/benchmark/resultados_mst.csv` y `resultados_unionfind.csv` → ejecuta P5A-02. 5.b sigue con datos preliminares hasta P5B-05.
 
+**27/11 · Benchmarks mejorados (Claude):** 5.a y 5.b ahora reportan media ± desviación estándar, mínimo, máximo y una curva teórica ajustada; 5.a alterna Kruskal/Prim y guarda cada corrida; 5.b mide 3 perfiles (A profundo, B aleatorio, C más consultas). `00_gestion/herramientas/empaquetar_codigo.py` arma los ZIP del anexo. Después de que Raul re-corra ambos benchmarks: ejecuta P5A-06 y P5B-06.
+
 ## 6. Tabla de prompts
 
 Fases: **1** = 5.a con el caso real · **2** = 5.b (requiere el código del caso real) · **3** = tiempos reales de la PC del grupo · **4** = revisión final.
@@ -59,17 +61,19 @@ Fases: **1** = 5.a con el caso real · **2** = 5.b (requiere el código del caso
 | Fase | ID | Hash | Archivo | Requisito | Entrega | Estado |
 |---|---|---|---|---|---|---|
 | 1 | **P5A-01** | `87271114` | `prompts/P5A-01_informe_red_dorsal.md` | — | Informe 5.a v2 (caso Red Dorsal) | ✅ |
-| 1 | **P5A-03** | `d5c7aa56` | `prompts/P5A-03_deck_red_dorsal.md` | — | Deck HTML 5.a (caso Red Dorsal) | ✅ |
-| 1 | **P5A-04** | `0f68ed34` | `prompts/P5A-04_imagenes.md` | P5A-03 | Imágenes de 5.a | ✅ |
-| 1 | **P5A-05** | `5da31c52` | `prompts/P5A-05_guiones.md` | P5A-03 | Guiones y preguntas 5.a | ✅ |
-| 2 | **P5B-00** | `a88754d8` | `prompts/P5B-00_datos_reales.md` | — | Datos reales del distrito y cortes programados | 🔄 |
-| 2 | **P5B-01** | `7517f248` | `prompts/P5B-01_informe_caso_real.md` | P5B-00 validado por Claude | Informe 5.b v2 (caso real) | ✅ |
-| 2 | **P5B-02** | `9475593e` | `prompts/P5B-02_deck.md` | P5B-01 | Deck HTML 5.b + prompts + guiones | ✅ |
-| 2 | **P5B-03** | `70ccfe51` | `prompts/P5B-03_imagenes.md` | P5B-02 | Imágenes de 5.b | ✅ |
-| 2 | **P5B-04** | `27d14b54` | `prompts/P5B-04_guiones.md` | P5B-02 | Guiones y preguntas 5.b | ✅ |
-| 3 | **P5A-02** | `84b0cba1` | `prompts/P5A-02_benchmark_pc.md` | CSV del benchmark en PC | Informe 5.a v3 con tiempos reales | ✅ |
-| 3 | **P5B-05** | `48150377` | `prompts/P5B-05_benchmark_pc.md` | CSV del benchmark en PC | Informe 5.b v3 con tiempos reales | ✅ |
-| 4 | **PGEN-01** | `515f3802` | `prompts/PGEN-01_revision_rubrica.md` | todo lo anterior | Revisión contra la rúbrica | ⏳ |
+| 1 | **P5A-03** | `4db8f7f7` | `prompts/P5A-03_deck_red_dorsal.md` | — | Deck HTML 5.a (caso Red Dorsal) | ✅ |
+| 1 | **P5A-04** | `9ed48fe2` | `prompts/P5A-04_imagenes.md` | P5A-03 | Imágenes de 5.a | ✅ |
+| 1 | **P5A-05** | `60b08ff4` | `prompts/P5A-05_guiones.md` | P5A-03 | Guiones y preguntas 5.a | ✅ |
+| 2 | **P5B-00** | `ca7ec80e` | `prompts/P5B-00_datos_reales.md` | — | Datos reales del distrito y cortes programados | 🔄 |
+| 2 | **P5B-01** | `6dbffb20` | `prompts/P5B-01_informe_caso_real.md` | P5B-00 validado por Claude | Informe 5.b v2 (caso real) | ✅ |
+| 2 | **P5B-02** | `eb7e6685` | `prompts/P5B-02_deck.md` | P5B-01 | Deck HTML 5.b + prompts + guiones | ✅ |
+| 2 | **P5B-03** | `937e3ce4` | `prompts/P5B-03_imagenes.md` | P5B-02 | Imágenes de 5.b | ✅ |
+| 2 | **P5B-04** | `c9262df5` | `prompts/P5B-04_guiones.md` | P5B-02 | Guiones y preguntas 5.b | ✅ |
+| 3 | **P5A-02** | `41e424a0` | `prompts/P5A-02_benchmark_pc.md` | CSV del benchmark en PC | Informe 5.a v3 con tiempos reales | ✅ |
+| 3 | **P5B-05** | `67f83fcc` | `prompts/P5B-05_benchmark_pc.md` | CSV del benchmark en PC | Informe 5.b v3 con tiempos reales | ✅ |
+| 4 | **PGEN-01** | `515f3802` | `prompts/PGEN-01_revision_rubrica.md` | todo lo anterior | Revisión contra la rúbrica | ✅ |
+| 5 | **P5A-06** | `cb77a978` | `prompts/P5A-06_sobresaliente_5a.md` | Benchmark 5.a re-corrido en PC (27/11) | Informe 5.a v4 + deck v5 (Sobresaliente) | ⏳ |
+| 5 | **P5B-06** | `8c9a61ba` | `prompts/P5B-06_sobresaliente_5b.md` | Benchmark 5.b re-corrido en PC (27/11) | Informe 5.b v4 + deck nuevo (Sobresaliente) | ⏳ |
 <!-- /TABLA -->
 
 ## 7. Bitácora (más reciente arriba)

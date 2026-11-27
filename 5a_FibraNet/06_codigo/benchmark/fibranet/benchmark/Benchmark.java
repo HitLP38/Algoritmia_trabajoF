@@ -14,6 +14,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
@@ -26,7 +28,11 @@ import java.util.Random;
  *                es el peor caso del ingenuo (une en cadena y luego consulta).
  *
  * Método: semilla fija, 2 corridas de calentamiento (la JVM compila el
- * código "caliente" en las primeras corridas) y promedio de 5 corridas.
+ * código "caliente" en las primeras corridas) y 5 corridas medidas, de las
+ * que se reporta media, desviación estándar, mínimo y máximo. Kruskal y Prim
+ * se alternan en cada corrida y cada corrida se guarda aparte
+ * (resultados_mst_corridas.csv). La curva teórica es c · cota, con c
+ * ajustada por mínimos cuadrados.
  * Para comparar con la teoría se divide el tiempo entre la cota (por
  * ejemplo E log2 V): si la razón se mantiene casi constante al crecer N,
  * la medición confirma la complejidad.
@@ -78,48 +84,95 @@ public final class Benchmark {
 
     private static void experimentoMst() throws IOException {
         Path ruta = Paths.get("benchmark", "resultados_mst.csv");
+        Path rutaCorridas = Paths.get("benchmark", "resultados_mst_corridas.csv");
         Files.createDirectories(ruta.getParent());
-        Tabla tabla = new Tabla("Densidad", "V", "E", "Kruskal (ms)", "Prim (ms)",
-                "Kruskal/(E log V)", "Prim/(E log V)", "Memoria (MB)");
-        try (PrintWriter csv = new PrintWriter(Files.newBufferedWriter(ruta, StandardCharsets.UTF_8))) {
-            csv.println("densidad,V,E,kruskal_ms,prim_ms,kruskal_ns_por_ElogV,prim_ns_por_ElogV,memoria_mb");
+        List<String[]> filas = new ArrayList<>();          // se guardan para ajustar la curva teórica al final
+        List<double[]> medidas = new ArrayList<>();        // {cota, mediaK, mediaP}
+        try (PrintWriter corridas = new PrintWriter(Files.newBufferedWriter(rutaCorridas, StandardCharsets.UTF_8))) {
+            corridas.println("densidad,V,E,corrida,primero,kruskal_ms,prim_ms");
             for (String densidad : new String[] {"dispersa", "densa"}) {
                 for (int v : TAMANOS_MST) {
                     int e = densidad.equals("dispersa") ? 4 * v : (int) (v * log2(v));
                     Grafo grafo = generarRedConexa(v, e, new Random(SEMILLA));
                     double memoria = memoriaUsadaMb();
-
-                    double msKruskal = medirMst(grafo, true);
-                    double msPrim = medirMst(grafo, false);
+                    double[][] t = medirMstAlternado(grafo, densidad, v, e, corridas);
+                    Estadistica k = new Estadistica(t[0]);
+                    Estadistica p = new Estadistica(t[1]);
                     double cota = e * log2(v);               // E log2 V
-                    double razonK = msKruskal * 1e6 / cota;  // nanosegundos por unidad de la cota
-                    double razonP = msPrim * 1e6 / cota;
-
-                    tabla.agregarFila(densidad, String.valueOf(v), String.valueOf(e), fmt(msKruskal),
-                            fmt(msPrim), fmt(razonK), fmt(razonP), fmt(memoria));
-                    csv.printf(Locale.US, "%s,%d,%d,%.4f,%.4f,%.4f,%.4f,%.2f%n",
-                            densidad, v, e, msKruskal, msPrim, razonK, razonP, memoria);
+                    medidas.add(new double[] {cota, k.media, p.media});
+                    filas.add(new String[] {densidad, String.valueOf(v), String.valueOf(e),
+                            f4(k.media), f4(k.desv), f4(k.min), f4(k.max),
+                            f4(p.media), f4(p.desv), f4(p.min), f4(p.max),
+                            f4(k.media * 1e6 / cota), f4(p.media * 1e6 / cota), f2(memoria)});
                 }
             }
-            if (csv.checkError()) {                        // PrintWriter no lanza excepciones: se revisa aquí
-                throw new IOException("falló la escritura de " + ruta);
-            }
+            revisar(corridas, rutaCorridas);
         }
-        System.out.println("\nExperimento 1: Kruskal vs Prim (tiempo promedio)");
+        // Curva teórica de referencia: t = c * E log2 V, con c ajustada por mínimos cuadrados
+        // a cada serie (densidad y algoritmo). Si la medición sigue la cota, queda pegada a ella.
+        double[] cK = new double[2];
+        double[] cP = new double[2];
+        for (int d = 0; d < 2; d++) {
+            double sk = 0, sp = 0, ff = 0;
+            for (int i = d * TAMANOS_MST.length; i < (d + 1) * TAMANOS_MST.length; i++) {
+                double[] m = medidas.get(i);
+                sk += m[1] * m[0];
+                sp += m[2] * m[0];
+                ff += m[0] * m[0];
+            }
+            cK[d] = sk / ff;
+            cP[d] = sp / ff;
+        }
+        Tabla tabla = new Tabla("Densidad", "V", "E", "Kruskal (ms)", "± desv", "Prim (ms)", "± desv",
+                "Kruskal teórico", "Prim teórico", "Memoria (MB)");
+        try (PrintWriter csv = new PrintWriter(Files.newBufferedWriter(ruta, StandardCharsets.UTF_8))) {
+            csv.println("densidad,V,E,kruskal_ms,kruskal_desv,kruskal_min,kruskal_max,prim_ms,prim_desv,prim_min,prim_max,"
+                    + "kruskal_ns_por_ElogV,prim_ns_por_ElogV,memoria_mb,kruskal_teorico_ms,prim_teorico_ms");
+            for (int i = 0; i < filas.size(); i++) {
+                String[] f = filas.get(i);
+                int d = i / TAMANOS_MST.length;
+                double cota = medidas.get(i)[0];
+                String tk = f4(cK[d] * cota);
+                String tp = f4(cP[d] * cota);
+                csv.println(String.join(",", f) + "," + tk + "," + tp);
+                tabla.agregarFila(f[0], f[1], f[2], f[3], f[4], f[7], f[8], tk, tp, f[13]);
+            }
+            revisar(csv, ruta);
+        }
+        System.out.println("\nExperimento 1: Kruskal vs Prim (media y desviación estándar de "
+                + REPETICIONES + " corridas; teórico = c · E log2 V ajustado)");
         tabla.imprimir();
         System.out.println("CSV: " + ruta.toAbsolutePath());
+        System.out.println("Corridas una por una: " + rutaCorridas.toAbsolutePath());
     }
 
-    /** Mide el promedio de varias corridas de Kruskal (true) o Prim (false), en ms. */
-    private static double medirMst(Grafo grafo, boolean kruskal) {
-        long total = 0;
+    /**
+     * Mide Kruskal y Prim sobre la misma red. En cada corrida se alterna cuál va primero,
+     * para que el orden (caché, recolector de basura) no favorezca siempre al mismo.
+     * Devuelve {tiemposKruskal, tiemposPrim} en ms, sin las corridas de calentamiento.
+     */
+    private static double[][] medirMstAlternado(Grafo grafo, String densidad, int v, int e, PrintWriter corridas) {
+        double[] k = new double[REPETICIONES];
+        double[] p = new double[REPETICIONES];
         for (int r = 0; r < CALENTAMIENTO + REPETICIONES; r++) {
-            ResultadoMST res = kruskal ? Kruskal.calcular(grafo, false) : Prim.calcular(grafo, 0, false);
-            if (r >= CALENTAMIENTO) {
-                total += res.nanosegundos;               // las de calentamiento no cuentan
+            boolean kruskalPrimero = (r % 2 == 0);
+            double msK;
+            double msP;
+            if (kruskalPrimero) {
+                msK = Kruskal.calcular(grafo, false).nanosegundos / 1e6;
+                msP = Prim.calcular(grafo, 0, false).nanosegundos / 1e6;
+            } else {
+                msP = Prim.calcular(grafo, 0, false).nanosegundos / 1e6;
+                msK = Kruskal.calcular(grafo, false).nanosegundos / 1e6;
+            }
+            if (r >= CALENTAMIENTO) {                      // las de calentamiento no cuentan
+                k[r - CALENTAMIENTO] = msK;
+                p[r - CALENTAMIENTO] = msP;
+                corridas.printf(Locale.US, "%s,%d,%d,%d,%s,%.4f,%.4f%n", densidad, v, e, r - CALENTAMIENTO + 1,
+                        kruskalPrimero ? "kruskal" : "prim", msK, msP);
             }
         }
-        return total / (double) REPETICIONES / 1e6;
+        return new double[][] {k, p};
     }
 
     /**
@@ -153,36 +206,56 @@ public final class Benchmark {
 
     private static void experimentoUnionFind() throws IOException {
         Path ruta = Paths.get("benchmark", "resultados_unionfind.csv");
-        Tabla tabla = new Tabla("n", "Operaciones", "Optimizado (ms)", "Ingenuo (ms)",
-                "Optimizado ns/op", "Ingenuo ns/op");
-        try (PrintWriter csv = new PrintWriter(Files.newBufferedWriter(ruta, StandardCharsets.UTF_8))) {
-            csv.println("n,operaciones,optimizado_ms,ingenuo_ms,optimizado_ns_por_op,ingenuo_ns_por_op");
-            for (int n : TAMANOS_UF) {
-                agregarFilaUf(tabla, csv, n, true);
-            }
-            for (int n : TAMANOS_UF_SOLO_OPTIMIZADO) {
-                agregarFilaUf(tabla, csv, n, false);       // el ingenuo tardaría minutos
-            }
-            if (csv.checkError()) {
-                throw new IOException("falló la escritura de " + ruta);
+        Tabla tabla = new Tabla("n", "Operaciones", "Optimizado (ms)", "± desv", "Ingenuo (ms)", "± desv",
+                "Optimizado ns/op", "Ingenuo ns/op", "Ingenuo teórico (ms)");
+        List<Integer> tamanos = new ArrayList<>();
+        List<Estadistica[]> stats = new ArrayList<>();
+        for (int n : TAMANOS_UF) {
+            tamanos.add(n);
+            stats.add(new Estadistica[] {new Estadistica(medirUnionFind(n, true)), new Estadistica(medirUnionFind(n, false))});
+        }
+        for (int n : TAMANOS_UF_SOLO_OPTIMIZADO) {         // el ingenuo tardaría minutos
+            tamanos.add(n);
+            stats.add(new Estadistica[] {new Estadistica(medirUnionFind(n, true)), null});
+        }
+        // Curvas teóricas: optimizado c1 · n (α(n) constante), ingenuo c2 · n² (cadena de n eslabones, n consultas)
+        double so = 0, oo = 0, si = 0, ii = 0;
+        for (int i = 0; i < tamanos.size(); i++) {
+            double n = tamanos.get(i);
+            so += stats.get(i)[0].media * n;
+            oo += n * n;
+            if (stats.get(i)[1] != null) {
+                si += stats.get(i)[1].media * n * n;
+                ii += n * n * n * n;
             }
         }
-        System.out.println("\nExperimento 2: Union-Find optimizado vs ingenuo (peor caso del ingenuo)");
+        double c1 = so / oo;
+        double c2 = si / ii;
+        try (PrintWriter csv = new PrintWriter(Files.newBufferedWriter(ruta, StandardCharsets.UTF_8))) {
+            csv.println("n,operaciones,optimizado_ms,ingenuo_ms,optimizado_ns_por_op,ingenuo_ns_por_op,"
+                    + "optimizado_desv,optimizado_min,optimizado_max,ingenuo_desv,ingenuo_min,ingenuo_max,"
+                    + "optimizado_teorico_ms,ingenuo_teorico_ms");
+            for (int i = 0; i < tamanos.size(); i++) {
+                int n = tamanos.get(i);
+                int operaciones = 2 * n - 1;               // n-1 uniones + n consultas
+                Estadistica o = stats.get(i)[0];
+                Estadistica g = stats.get(i)[1];
+                String teoIng = f4(c2 * (double) n * n);
+                csv.println(String.join(",", String.valueOf(n), String.valueOf(operaciones), f4(o.media),
+                        g == null ? "" : f4(g.media), f4(o.media * 1e6 / operaciones),
+                        g == null ? "" : f4(g.media * 1e6 / operaciones),
+                        f4(o.desv), f4(o.min), f4(o.max),
+                        g == null ? "" : f4(g.desv), g == null ? "" : f4(g.min), g == null ? "" : f4(g.max),
+                        f4(c1 * n), teoIng));
+                tabla.agregarFila(String.valueOf(n), String.valueOf(operaciones), fmt(o.media), fmt(o.desv),
+                        g == null ? "-" : fmt(g.media), g == null ? "-" : fmt(g.desv),
+                        fmt(o.media * 1e6 / operaciones), g == null ? "-" : fmt(g.media * 1e6 / operaciones), teoIng);
+            }
+            revisar(csv, ruta);
+        }
+        System.out.println("\nExperimento 2: Union-Find optimizado vs ingenuo (peor caso del ingenuo; teórico = c · n²)");
         tabla.imprimir();
         System.out.println("CSV: " + ruta.toAbsolutePath());
-    }
-
-    private static void agregarFilaUf(Tabla tabla, PrintWriter csv, int n, boolean conIngenuo) {
-        int operaciones = 2 * n - 1;                       // n-1 uniones + n consultas
-        double msOpt = medirUnionFind(n, true);
-        double msIng = conIngenuo ? medirUnionFind(n, false) : Double.NaN;
-        double nsOpt = msOpt * 1e6 / operaciones;
-        double nsIng = msIng * 1e6 / operaciones;
-        tabla.agregarFila(String.valueOf(n), String.valueOf(operaciones), fmt(msOpt),
-                conIngenuo ? fmt(msIng) : "-", fmt(nsOpt), conIngenuo ? fmt(nsIng) : "-");
-        csv.printf(Locale.US, "%d,%d,%.4f,%s,%.4f,%s%n", n, operaciones, msOpt,
-                conIngenuo ? String.format(Locale.US, "%.4f", msIng) : "",
-                nsOpt, conIngenuo ? String.format(Locale.US, "%.4f", nsIng) : "");
     }
 
     /**
@@ -190,9 +263,10 @@ public final class Benchmark {
      *   union(0,1), union(1,2), ..., union(n-2,n-1)   -> en el ingenuo forma una cadena
      *   find(0) repetido n veces                      -> en el ingenuo recorre la cadena entera
      * Ingenuo: O(n²). Optimizado: O(n α(n)), prácticamente lineal.
+     * Devuelve el tiempo de cada corrida en ms, sin las de calentamiento.
      */
-    private static double medirUnionFind(int n, boolean optimizado) {
-        long total = 0;
+    private static double[] medirUnionFind(int n, boolean optimizado) {
+        double[] tiempos = new double[REPETICIONES];
         long control = 0;                                  // evita que la JVM elimine el trabajo
         for (int r = 0; r < CALENTAMIENTO + REPETICIONES; r++) {
             long inicio = System.nanoTime();
@@ -215,13 +289,13 @@ public final class Benchmark {
             }
             long fin = System.nanoTime();
             if (r >= CALENTAMIENTO) {
-                total += fin - inicio;
+                tiempos[r - CALENTAMIENTO] = (fin - inicio) / 1e6;
             }
         }
         if (control == -1) {
             System.out.println();                          // nunca ocurre
         }
-        return total / (double) REPETICIONES / 1e6;
+        return tiempos;
     }
 
     // ------------------------------------------------------------------
@@ -241,5 +315,46 @@ public final class Benchmark {
 
     private static String fmt(double valor) {
         return String.format(Locale.US, "%.3f", valor);
+    }
+
+    private static String f4(double valor) {
+        return String.format(Locale.US, "%.4f", valor);
+    }
+
+    private static String f2(double valor) {
+        return String.format(Locale.US, "%.2f", valor);
+    }
+
+    private static void revisar(PrintWriter csv, Path ruta) throws IOException {
+        if (csv.checkError()) {                            // PrintWriter no lanza excepciones: se revisa aquí
+            throw new IOException("falló la escritura de " + ruta);
+        }
+    }
+
+    /** Media, desviación estándar muestral, mínimo y máximo de las corridas. */
+    static final class Estadistica {
+        final double media;
+        final double desv;
+        final double min;
+        final double max;
+
+        Estadistica(double[] x) {
+            double suma = 0;
+            double mn = Double.MAX_VALUE;
+            double mx = -Double.MAX_VALUE;
+            for (double v : x) {
+                suma += v;
+                mn = Math.min(mn, v);
+                mx = Math.max(mx, v);
+            }
+            media = suma / x.length;
+            double cuadrados = 0;
+            for (double v : x) {
+                cuadrados += (v - media) * (v - media);
+            }
+            desv = x.length > 1 ? Math.sqrt(cuadrados / (x.length - 1)) : 0;
+            min = mn;
+            max = mx;
+        }
     }
 }

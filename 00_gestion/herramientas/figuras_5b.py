@@ -14,10 +14,16 @@ r = list(csv.DictReader(open(os.path.join(B, 'resultados_lct.csv'))))
 
 # Fig. 3: tiempo total LCT vs BFS (log-log)
 fig, ax = plt.subplots(figsize=(3.4, 2.4))
-ax.loglog([int(x['N']) for x in r], [float(x['lct_ms']) for x in r], 'o-', color='black', ms=3, label='Link-Cut Tree')
 b = [x for x in r if x['bfs_ms']]
-ax.loglog([int(x['N']) for x in b], [float(x['bfs_ms']) for x in b], 's--', color='gray', ms=3, label='BFS (ingenuo)')
+ax.set_xscale('log'); ax.set_yscale('log')
+for filas, col, mk, nom, clave in ((r, 'black', 'o', 'Link-Cut Tree', 'lct'), (b, 'gray', 's', 'BFS (ingenuo)', 'bfs')):
+    X = [int(x['N']) for x in filas]
+    err = [float(x[clave + '_desv']) for x in filas] if clave + '_desv' in filas[0] else None
+    ax.errorbar(X, [float(x[clave + '_ms']) for x in filas], yerr=err, fmt=mk, ls='none', color=col, ms=3, capsize=2, lw=0.7, label=nom)
+    if clave + '_teorico_ms' in r[0]:
+        ax.plot(X, [float(x[clave + '_teorico_ms']) for x in filas], '--' if clave == 'bfs' else '-', color=col, lw=0.8)
 ax.set_xlabel('N = M (nodos y operaciones)'); ax.set_ylabel('Tiempo total (ms)'); ax.legend(fontsize=6.5)
+ax.text(0.02, 0.97, 'líneas: c·M·log₂N (LCT) y c·M·N (BFS)', transform=ax.transAxes, fontsize=5.5, va='top', style='italic')
 fig.tight_layout(); fig.savefig(os.path.join(O, 'fig_lct.png'), dpi=300)
 
 # Fig. 4: tiempo normalizado por la cota
@@ -38,7 +44,7 @@ caja(4, 7, 4, 1.1, 'redluz.Main\n(menú 0–11)')
 caja(0.1, 4.5, 3.6, 1.6, 'io\nLectorCsv\nProcesadorEventos\nMensajes · Tabla')
 caja(4.2, 4.5, 3.6, 1.6, 'modelo\nRedDinamica\nRedElectrica\nRedIngenua (BFS)')
 caja(4.2, 1.6, 3.6, 1.6, 'motor\nLinkCutTree · Nodo\n(splay + path-parent)', fc='#dddddd')
-caja(8.3, 4.5, 3.6, 1.6, 'pruebas\n45 verificaciones')
+caja(8.3, 4.5, 3.6, 1.6, 'pruebas\n50 verificaciones')
 caja(8.3, 1.6, 3.6, 1.6, 'benchmark\nLCT vs BFS')
 flecha((5.2, 7), (2.4, 6.1)); flecha((6, 7), (6, 6.1)); flecha((3.7, 5.3), (4.2, 5.3)); flecha((6, 4.5), (6, 3.2))
 flecha((8.3, 5.3), (7.8, 5.3)); flecha((8.3, 2.4), (7.8, 4.8))
@@ -61,4 +67,15 @@ for n, (x, y) in P.items():
 ax.text(8.9, 1.6, 'cortado', fontsize=5.5, color='gray', style='italic')
 ax.text(0.1, 6.5, '- - unión virtual (0 km)\n▭ nodo-tramo (km, 1 tramo)', fontsize=5.4, va='top')
 fig.tight_layout(); fig.savefig(os.path.join(O, 'fig_modelo.png'), dpi=300)
+# Fig. 5: perfiles (si existe el CSV de perfiles)
+rp = os.path.join(B, 'resultados_lct_perfiles.csv')
+if os.path.exists(rp):
+    q = list(csv.DictReader(open(rp, encoding='utf-8')))
+    fig, ax = plt.subplots(figsize=(3.4, 2.4))
+    for per, mk in (('A', 'o'), ('B', '^'), ('C', 'D')):
+        f = [x for x in q if x['perfil'] == per]
+        ax.semilogx([int(x['N']) for x in f], [float(x['lct_ns_por_MlogN']) for x in f], mk + '-', color='black', ms=3, lw=0.8,
+                    label=per + ' · ' + f[0]['descripcion'])
+    ax.set_ylim(0, None); ax.set_xlabel('N'); ax.set_ylabel('LCT: ns / (M log₂N)'); ax.legend(fontsize=5.5)
+    fig.tight_layout(); fig.savefig(os.path.join(O, 'fig_perfiles.png'), dpi=300)
 print('ok')

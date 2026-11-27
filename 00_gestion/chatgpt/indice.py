@@ -18,6 +18,8 @@ FASES = {  # ID: (fase, requisito, entrega corta)
     "P5A-02": ("3", "CSV del benchmark en PC", "Informe 5.a v3 con tiempos reales"),
     "P5B-05": ("3", "CSV del benchmark en PC", "Informe 5.b v3 con tiempos reales"),
     "PGEN-01": ("4", "todo lo anterior", "Revisión contra la rúbrica"),
+    "P5A-06": ("5", "Benchmark 5.a re-corrido en PC (27/11)", "Informe 5.a v4 + deck v5 (Sobresaliente)"),
+    "P5B-06": ("5", "Benchmark 5.b re-corrido en PC (27/11)", "Informe 5.b v4 + deck nuevo (Sobresaliente)"),
 }
 filas = []
 for nombre in sorted(os.listdir(os.path.join(AQUI, "prompts"))):
