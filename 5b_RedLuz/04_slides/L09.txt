@@ -1,0 +1,7 @@
+Lámina 09 · Rotar conserva el orden
+Expone: Acosta Simon, Christopher Ricardo
+
+Imagen opcional de apoyo.
+Guardar como 5b_RedLuz/03_ppt/img/L09.png
+
+Dos árboles binarios antes y después de una rotación derecha; mismos nodos a, x, b, p y c. Ilustración técnica horizontal 16:9, fondo claro, granate #8A1D2C, dorado #A87A22 y azul #1F5FA8. Geometría limpia y texto solo si se indica.

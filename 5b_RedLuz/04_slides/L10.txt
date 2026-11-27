@@ -1,0 +1,7 @@
+Lámina 10 · Splay aplica rotaciones
+Expone: Acosta Simon, Christopher Ricardo
+
+Imagen opcional de apoyo.
+Guardar como 5b_RedLuz/03_ppt/img/L10.png
+
+Tres esquemas de zig, zig-zig y zig-zag, con el nodo que sube resaltado. Ilustración técnica horizontal 16:9, fondo claro, granate #8A1D2C, dorado #A87A22 y azul #1F5FA8. Geometría limpia y texto solo si se indica.

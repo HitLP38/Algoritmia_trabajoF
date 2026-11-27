@@ -1,0 +1,7 @@
+Lámina 12 · Access en Java
+Expone: Gavilano Kanashiro, Santiago
+
+Imagen opcional de apoyo.
+Guardar como 5b_RedLuz/03_ppt/img/L12.png
+
+Diagrama de tres pasos de access: elevar, sustituir el hijo derecho y actualizar. Ilustración técnica horizontal 16:9, fondo claro, granate #8A1D2C, dorado #A87A22 y azul #1F5FA8. Geometría limpia y texto solo si se indica.

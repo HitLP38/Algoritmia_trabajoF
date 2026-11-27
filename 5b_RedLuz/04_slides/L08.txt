@@ -1,0 +1,7 @@
+Lámina 08 · Caminos preferidos
+Expone: Acosta Simon, Christopher Ricardo
+
+Se usa en el deck. El SVG integrado sirve de respaldo.
+Guardar como 5b_RedLuz/03_ppt/img/L08.png
+
+Árbol de seis nodos. Resalta F–S1–P1–C1 y deja P2–C2 como ramal alterno. Ilustración técnica horizontal 16:9, fondo claro, granate #8A1D2C, dorado #A87A22 y azul #1F5FA8. Geometría limpia y texto solo si se indica.

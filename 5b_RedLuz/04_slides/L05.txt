@@ -1,0 +1,7 @@
+Lámina 05 · Una FUENTE para el bosque
+Expone: Cerron Arica, Gianpierre Eyner
+
+Imagen opcional de apoyo.
+Guardar como 5b_RedLuz/03_ppt/img/L05.png
+
+Bosque radial de dos subestaciones con una fuente virtual y conexiones de 0 km diferenciadas. Ilustración técnica horizontal 16:9, fondo claro, granate #8A1D2C, dorado #A87A22 y azul #1F5FA8. Geometría limpia y texto solo si se indica.

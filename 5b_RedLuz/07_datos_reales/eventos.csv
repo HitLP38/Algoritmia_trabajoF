@@ -1,0 +1,17 @@
+evento,a,b,km,nota
+CORTAR,P_A02,P_A03,,Corte programado 16/11/2026 13:30-15:00 (Pluz Energía) - simulación
+AFECTADOS,,,,
+LUZ,C_A04_1,,,
+RUTA,C_A04_1,,,
+CORTAR,P_B04,P_B05,,Corte programado 16/11/2026 14:30-16:00 (Pluz Energía) - simulación
+AFECTADOS,,,,
+LUZ,C_B06_1,,,
+RUTA,C_B06_1,,,
+CONECTAR,P_A02,P_A03,0.07783645,Reposición de escenario A según fin de ventana anunciada - simulación
+AFECTADOS,,,,
+LUZ,C_A04_1,,,
+RUTA,C_A04_1,,,
+CONECTAR,P_B04,P_B05,0.07783645,Reposición de escenario B según fin de ventana anunciada - simulación
+AFECTADOS,,,,
+LUZ,C_B06_1,,,
+RUTA,C_B06_1,,,

@@ -1,0 +1,7 @@
+Lámina 06 · El peso vive en el nodo-tramo
+Expone: Cerron Arica, Gianpierre Eyner
+
+Imagen opcional de apoyo.
+Guardar como 5b_RedLuz/03_ppt/img/L06.png
+
+Cadena alternada de vértices circulares y nodos-tramo cuadrados con pesos 0,8 y 0,2 km. Ilustración técnica horizontal 16:9, fondo claro, granate #8A1D2C, dorado #A87A22 y azul #1F5FA8. Geometría limpia y texto solo si se indica.

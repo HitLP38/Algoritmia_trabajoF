@@ -1,0 +1,7 @@
+Lámina 20 · Benchmark · Link-Cut Tree frente a BFS
+Expone: Guzman Lopez, Raul Antonio
+
+Imagen opcional de apoyo.
+Guardar como 5b_RedLuz/03_ppt/img/L20.png
+
+Gráfico técnico de dos series con escalas logarítmicas. Tomar los valores del CSV y respetar los puntos ausentes. Ilustración técnica horizontal 16:9, fondo claro, granate #8A1D2C, dorado #A87A22 y azul #1F5FA8. Geometría limpia y texto solo si se indica.

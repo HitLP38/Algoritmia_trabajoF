@@ -1,0 +1,7 @@
+Lámina 07 · Costo de consultar el bosque
+Expone: Cerron Arica, Gianpierre Eyner
+
+Imagen opcional de apoyo.
+Guardar como 5b_RedLuz/03_ppt/img/L07.png
+
+Comparación conceptual de una operación sobre un camino y un recorrido por un componente. Ilustración técnica horizontal 16:9, fondo claro, granate #8A1D2C, dorado #A87A22 y azul #1F5FA8. Geometría limpia y texto solo si se indica.

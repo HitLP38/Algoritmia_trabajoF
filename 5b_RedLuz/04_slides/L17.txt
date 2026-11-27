@@ -1,0 +1,7 @@
+Lámina 17 · Simulador de corte y reconexión
+Expone: Loli Aldunate, Cesar Antoni
+
+Imagen opcional de apoyo.
+Guardar como 5b_RedLuz/03_ppt/img/L17.png
+
+Diagrama en tres estados de una red con FUENTE, S1, P1 y C1 conectada, cortada y restaurada. Ilustración técnica horizontal 16:9, fondo claro, granate #8A1D2C, dorado #A87A22 y azul #1F5FA8. Geometría limpia y texto solo si se indica.

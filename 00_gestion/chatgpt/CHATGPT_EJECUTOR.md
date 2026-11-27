@@ -63,17 +63,19 @@ Fases: **1** = 5.a con el caso real · **2** = 5.b (requiere el código del caso
 | 1 | **P5A-04** | `0f68ed34` | `prompts/P5A-04_imagenes.md` | P5A-03 | Imágenes de 5.a | ✅ |
 | 1 | **P5A-05** | `5da31c52` | `prompts/P5A-05_guiones.md` | P5A-03 | Guiones y preguntas 5.a | ✅ |
 | 2 | **P5B-00** | `a88754d8` | `prompts/P5B-00_datos_reales.md` | — | Datos reales del distrito y cortes programados | 🔄 |
-| 2 | **P5B-01** | `6dbffb20` | `prompts/P5B-01_informe_caso_real.md` | P5B-00 validado por Claude | Informe 5.b v2 (caso real) | ⏳ |
+| 2 | **P5B-01** | `7517f248` | `prompts/P5B-01_informe_caso_real.md` | P5B-00 validado por Claude | Informe 5.b v2 (caso real) | ✅ |
 | 2 | **P5B-02** | `eb7e6685` | `prompts/P5B-02_deck.md` | P5B-01 | Deck HTML 5.b + prompts + guiones | ⏳ |
 | 2 | **P5B-03** | `937e3ce4` | `prompts/P5B-03_imagenes.md` | P5B-02 | Imágenes de 5.b | ⏳ |
 | 2 | **P5B-04** | `c9262df5` | `prompts/P5B-04_guiones.md` | P5B-02 | Guiones y preguntas 5.b | ⏳ |
 | 3 | **P5A-02** | `84b0cba1` | `prompts/P5A-02_benchmark_pc.md` | CSV del benchmark en PC | Informe 5.a v3 con tiempos reales | ✅ |
-| 3 | **P5B-05** | `67f83fcc` | `prompts/P5B-05_benchmark_pc.md` | CSV del benchmark en PC | Informe 5.b v3 con tiempos reales | ⏳ |
+| 3 | **P5B-05** | `48150377` | `prompts/P5B-05_benchmark_pc.md` | CSV del benchmark en PC | Informe 5.b v3 con tiempos reales | ✅ |
 | 4 | **PGEN-01** | `515f3802` | `prompts/PGEN-01_revision_rubrica.md` | todo lo anterior | Revisión contra la rúbrica | ⏳ |
 <!-- /TABLA -->
 
 ## 7. Bitácora (más reciente arriba)
 
+- 26/11/2026 · P5B-05 completado. Informe_RedLuz_v3.docx incorpora el benchmark de la PC del grupo.
+- 26/11/2026 · P5B-01 completado. Informe_RedLuz_v2.docx documenta Magdalena del Mar y la ejecución de los 16 eventos del modelo radial.
 - 26/11/2026 · P5A-05 completado. Guion, división y preguntas v2. Las 22 notas del deck v4 coinciden con el guion (24:20).
 - 26/11/2026 · P5A-04 completado. Se guardaron L01, L03, L08, L11, L14 y L17 en 5a_FibraNet/03_ppt/img/.
 - 26/11/2026 · P5A-03 completado. FibraNet_Slides_v3.html y sus simuladores incorporan el caso Red Dorsal Nacional.
